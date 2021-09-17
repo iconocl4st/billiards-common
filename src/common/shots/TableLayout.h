@@ -11,7 +11,7 @@
 
 namespace billiards::layout {
 
-	class LocatedBall {
+	class LocatedBall : public json::Serializable {
 	public:
 		config::BallInfo info;
 		geometry::Point location;
@@ -19,28 +19,62 @@ namespace billiards::layout {
 		LocatedBall(const config::BallInfo& info, const geometry::Point& location) :
 			info{info},
 			location{location} {}
+			
+		
+		LocatedBall() : info{}, location{} {}
 
 		~LocatedBall() = default;
 
-//		inline
-//		virtual void to_json(SaxWriter& writer) override {
-//			writer.begin_object();
-//			writer.key("info");
-//			info.to_json(writer);
-//			writer.key("location");
-//			location.to_json(writer);
-//			writer.end_object();
-//		}
-//
-//		inline
-//		virtual void parse(const nlohmann::json& value) override {
-//
-//		}
+		inline
+		void to_json(json::SaxWriter& writer) const override {
+			writer.begin_object();
+			writer.key("info");
+			info.to_json(writer);
+			writer.key("location");
+			location.to_json(writer);
+			writer.end_object();
+		}
+
+		inline
+		void parse(const nlohmann::json& value) override {
+			if (value.contains("info") && value["info"].is_object()) {
+				info.parse(value["info"]);
+			}
+			if (value.contains("location") && value["location"].is_object()) {
+				location.parse(value["location"]);
+			}
+		}
 	};
 
-	class TableLayout {
+	class TableLayout : public json::Serializable {
 	public:
 		std::list<LocatedBall> balls;
+		
+		TableLayout() = default;
+		virtual ~TableLayout() = default;
+		
+		
+		inline
+		void to_json(json::SaxWriter& writer) const override {
+			writer.begin_object();
+			writer.key("balls");
+			for (const auto& it : balls) {
+				it.to_json(writer);
+			}
+			writer.end_object();
+		}
+
+		inline
+		void parse(const nlohmann::json& value) override {
+			balls.clear();
+			
+			if (value.contains("balls") && value["balls"].is_array()) {
+				for (const auto& it : value["balls"]) {
+					balls.emplace_back(LocatedBall{});
+					balls.back().parse(it);
+				}
+			}
+		}
 	};
 
 }

@@ -14,25 +14,80 @@ namespace billiards::config {
 	enum BallType {
 		SOLID,
 		STRIPE,
-		CUE
+		CUE,
+		UNINITIALIZED,
 	};
 
-	class BallInfo {
+	class BallInfo : json::Serializable {
 	public:
-		BallType solid;
+		BallType ball_type;
 		double radius;
 		gphx::Color color;
 		int number;
 		std::string name;
-
-		BallInfo(BallType solid, double radius, gphx::Color color, int number, const char *name) :
-			solid{solid},
+		
+		BallInfo(BallType ball_type, double radius, gphx::Color color, int number, const char *name) :
+			ball_type{ball_type},
 			radius{radius},
 			color{color},
 			number{number},
 			name{name} {}
 
+		BallInfo() : BallInfo{UNINITIALIZED, -1, gphx::Color{0, 0, 0, 0}, -1, "uninitialized"} {}
+
 		~BallInfo() = default;
+		
+		void to_json(json::SaxWriter& writer) const override {
+			writer.begin_object();
+			writer.field("radius", radius);
+			writer.field("number", number);
+			writer.field("name", name);
+			writer.key("color");
+			color.to_json(writer);
+			writer.key("ball-type");
+			switch (ball_type) {
+				case SOLID:
+					writer.value("solid");
+					break;
+				case STRIPE:
+					writer.value("stripe");
+					break;
+				case CUE:
+					writer.value("cue");
+					break;
+//				default:
+//					// TODO: Throw an error....
+//					break;
+			}
+			writer.end_object();
+		}
+		
+		void parse(const nlohmann::json& value) override {
+			if (value.contains("radius") && value["radius"].is_number()) {
+				radius = value["radius"].get<double>();
+			}
+			if (value.contains("number") && value["number"].is_number()) {
+				number = value["number"].get<int>();
+			}
+			if (value.contains("color") && value["color"].is_object()) {
+				color.parse(value["color"]);
+			}
+			if (value.contains("name") && value["name"].is_string()) {
+				name = value["name"].get<std::string>();
+			}
+			if (value.contains("ball-type") && value["ball-type"].is_string()) {
+				std::string ball_type_str{value["height"].get<std::string>()};
+				if (ball_type_str == "solid") {
+					ball_type = SOLID;
+				} else if (ball_type_str == "stripe") {
+					ball_type = STRIPE;
+				} else if (ball_type_str == "cue") {
+					ball_type = CUE;
+				} else {
+					// TODO:
+				}
+			}
+		}
 
 	};
 

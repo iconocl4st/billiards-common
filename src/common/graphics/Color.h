@@ -13,6 +13,7 @@ namespace billiards::gphx {
 
 class Color : public json::Serializable {
 	public:
+		// TODO: Make these be uint8_t...
 		double red;
 		double green;
 		double blue;
@@ -24,7 +25,9 @@ class Color : public json::Serializable {
 			assert(blue >= 0 && blue <= 1.0);
 			assert(alpha >= 0 && alpha <= 1.0);
 		}
+		
 		Color(double red, double green, double blue) : Color{red, green, blue, 0} {}
+		
 		Color() : Color{0, 0, 0} {}
 
 		void parse(const nlohmann::json& value) override {

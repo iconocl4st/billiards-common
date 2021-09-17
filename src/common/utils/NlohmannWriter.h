@@ -88,7 +88,7 @@ namespace billiards::json {
 				std::cerr << "Unknown context" << std::endl;
 			}
 		}
-		void value(bool b) override {
+		void value(bool val) override {
 			if (stack.back().first == IN_OBJECT) {
 				stack.back().second[current_key] = val;
 			} else if (stack.back().first == IN_ARRAY) {
@@ -97,7 +97,7 @@ namespace billiards::json {
 				std::cerr << "Unknown context" << std::endl;
 			}
 		}
-		void value(const std::string &str) override {
+		void value(const std::string &val) override {
 			if (stack.back().first == IN_OBJECT) {
 				stack.back().second[current_key] = val;
 			} else if (stack.back().first == IN_ARRAY) {
@@ -106,7 +106,7 @@ namespace billiards::json {
 				std::cerr << "Unknown context" << std::endl;
 			}
 		}
-		void value(double d) override {
+		void value(double val) override {
 			if (stack.back().first == IN_OBJECT) {
 				stack.back().second[current_key] = val;
 			} else if (stack.back().first == IN_ARRAY) {
