@@ -5,9 +5,11 @@
 #ifndef GLVIEW_TABLELAYOUT_H
 #define GLVIEW_TABLELAYOUT_H
 
-#include "../config/BallDimensions.h"
-#include "../geometry/Point.h"
 #include <list>
+
+#include "../config/Ball.h"
+#include "../geometry/Dimensions.h"
+#include "../geometry/Point.h"
 
 namespace billiards::layout {
 
@@ -46,13 +48,22 @@ namespace billiards::layout {
 		}
 	};
 
-	class TableLayout : public json::Serializable {
+	class Layout : public json::Serializable {
 	public:
 		std::list<LocatedBall> balls;
-		
-		TableLayout() = default;
-		virtual ~TableLayout() = default;
-		
+		geometry::Dimensions table_dims;
+
+		Layout() = default;
+		virtual ~Layout() = default;
+
+		const LocatedBall* cue_ball() const {
+			for (const auto& it : balls) {
+				if (it.info.is_cue()) {
+					return &it;
+				}
+			}
+			return nullptr;
+		}
 		
 		inline
 		void to_json(json::SaxWriter& writer) const override {
@@ -61,6 +72,8 @@ namespace billiards::layout {
 			for (const auto& it : balls) {
 				it.to_json(writer);
 			}
+			writer.key("table-dimensions");
+			table_dims.to_json(writer);
 			writer.end_object();
 		}
 
@@ -73,6 +86,10 @@ namespace billiards::layout {
 					balls.emplace_back(LocatedBall{});
 					balls.back().parse(it);
 				}
+			}
+
+			if (value.contains("table-dimensions") && value["table-dimensions"].is_object()) {
+				table_dims.parse(value["table-dimensions"]);
 			}
 		}
 	};

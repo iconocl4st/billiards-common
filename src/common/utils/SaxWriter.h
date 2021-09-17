@@ -6,6 +6,7 @@
 #define GLVIEW_SAXWRITER_H
 
 #include <string>
+#include <ctype.h>
 
 namespace billiards::json {
 
@@ -26,6 +27,8 @@ namespace billiards::json {
 		virtual void key(const std::string &str) = 0;
 
 		virtual void value(int val) = 0;
+		virtual void value(uint64_t val) = 0;
+		virtual void value(uint8_t val) = 0;
 		virtual void value(bool val) = 0;
 		virtual void value(const std::string &val) = 0;
 		virtual void value(double val) = 0;
@@ -35,6 +38,9 @@ namespace billiards::json {
 		virtual void field(const std::string &key, int val) = 0;
 		virtual void field(const std::string &key, bool val) = 0;
 		virtual void field(const std::string &key, double val) = 0;
+		virtual void field(const std::string &key, uint64_t val) = 0;
+		virtual void field(const std::string &key, uint8_t val) = 0;
+
 		virtual void null_field(const std::string &key) = 0;
 
 

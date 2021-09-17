@@ -17,9 +17,11 @@ namespace billiards::json {
 		Serializable() = default;;
 		virtual ~Serializable() = default;
 
-		virtual void to_json(SaxWriter& writer) const = 0;
-// TODO: change this to a SaxReader
+		virtual void to_json(json::SaxWriter& writer) const = 0;
+
 		virtual void parse(const nlohmann::json& value) = 0;
+
+		// TODO: change this to a SaxReader instead of a nlohmann::json
 	};
 }
 

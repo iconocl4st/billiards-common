@@ -7,17 +7,18 @@
 
 #include "common/utils/Serializable.h"
 
-namespace billiards::config {
+namespace billiards::geometry {
 
-	class TableDimensions : public json::Serializable {
+	class Dimensions : public json::Serializable {
 	public:
 		double width;
 		double height;
 
-		TableDimensions(double w, double h) : width{w}, height{h} {}
-		TableDimensions() : width{92}, height{46} {}
+		Dimensions(double w, double h) : width{w}, height{h} {}
+		Dimensions() : width{-1}, height{-1} {}
+//		Dimensions() : width{92}, height{46} {}
 
-		virtual ~TableDimensions() = default;
+		virtual ~Dimensions() = default;
 		
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();

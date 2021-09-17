@@ -16,13 +16,26 @@ namespace billiards::utils {
 		bool success;
 		std::string key;
 		const json::Serializable *data;
-		
-		
+		std::function<void(json::SaxWriter&)> callable;
+		bool use_callable;
+
+
+		DefaultResponse(const std::string& message, bool success, const std::string& key, std::function<void(json::SaxWriter&)> callable)
+			: message{message}
+			, success{success}
+			, key{key}
+			, data{nullptr}
+			, callable{callable}
+			, use_callable{true}
+		{}
+
 		DefaultResponse(const std::string& message, bool success, const std::string& key, const json::Serializable *data)
 			: message{message}
 			, success{success}
 			, key{key}
 			, data{data}
+			, callable{[](json::SaxWriter&){}}
+			, use_callable{false}
 			{}
 			
 		DefaultResponse(const std::string& message, bool success, json::Serializable *data)
@@ -45,7 +58,10 @@ namespace billiards::utils {
 			writer.begin_object();
 			writer.field("message", message);
 			writer.field("success", success);
-			if (data != nullptr) {
+			if (use_callable) {
+				writer.key(key);
+				callable(writer);
+			} else if (data != nullptr) {
 				writer.key(key);
 				data->to_json(writer);
 			}

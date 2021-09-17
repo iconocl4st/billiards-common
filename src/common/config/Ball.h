@@ -18,6 +18,33 @@ namespace billiards::config {
 		UNINITIALIZED,
 	};
 
+	std::string ball_type_to_string(BallType type) {
+		switch (type) {
+			case SOLID:
+				return "solid";
+			case STRIPE:
+				return "stripe";
+			case CUE:
+				return "cue";
+			case UNINITIALIZED:
+			default:
+				return "unknown";
+		}
+	}
+
+	BallType string_to_ball_type(const std::string& str) {
+		if (str == "solid") {
+			return SOLID;
+		} else if (str == "stripe") {
+			return STRIPE;
+		} else if (str == "cue") {
+			return CUE;
+		} else {
+			return UNINITIALIZED;
+		}
+	}
+
+
 	class BallInfo : json::Serializable {
 	public:
 		BallType ball_type;
@@ -36,6 +63,12 @@ namespace billiards::config {
 		BallInfo() : BallInfo{UNINITIALIZED, -1, gphx::Color{0, 0, 0, 0}, -1, "uninitialized"} {}
 
 		~BallInfo() = default;
+
+		bool is_cue() const { return ball_type == CUE; }
+
+		bool operator==(const BallInfo& other) const {
+			return number == other.number /* && ball_type == other.ball_type */;
+		}
 		
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
@@ -44,21 +77,7 @@ namespace billiards::config {
 			writer.field("name", name);
 			writer.key("color");
 			color.to_json(writer);
-			writer.key("ball-type");
-			switch (ball_type) {
-				case SOLID:
-					writer.value("solid");
-					break;
-				case STRIPE:
-					writer.value("stripe");
-					break;
-				case CUE:
-					writer.value("cue");
-					break;
-//				default:
-//					// TODO: Throw an error....
-//					break;
-			}
+			writer.field("ball-type", ball_type_to_string(ball_type));
 			writer.end_object();
 		}
 		
@@ -76,16 +95,7 @@ namespace billiards::config {
 				name = value["name"].get<std::string>();
 			}
 			if (value.contains("ball-type") && value["ball-type"].is_string()) {
-				std::string ball_type_str{value["height"].get<std::string>()};
-				if (ball_type_str == "solid") {
-					ball_type = SOLID;
-				} else if (ball_type_str == "stripe") {
-					ball_type = STRIPE;
-				} else if (ball_type_str == "cue") {
-					ball_type = CUE;
-				} else {
-					// TODO:
-				}
+				ball_type = string_to_ball_type(value["ball-type"].get<std::string>());
 			}
 		}
 

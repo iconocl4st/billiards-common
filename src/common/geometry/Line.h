@@ -9,27 +9,32 @@
 #include <optional>
 #include "./tolerance.h"
 
-class Line {
-public:
-	// Represents the set of points that satisfy a * x + b * y + c == 0
-	double a, b, c;
+namespace billiards::geometry {
 
-	Line(double a, double b, double c): a{a}, b{b}, c{c} {}
-	~Line() = default;
+	class Line {
+	public:
+		// Represents the set of points that satisfy a * x + b * y + c == 0
+		double a, b, c;
 
-	inline
-	std::optional<Line> normalize() const {
-		double n = std::sqrt(a * a + b * b);
-		if (n < TOLERANCE) {
-			return {};
+		Line(double a, double b, double c) : a{a}, b{b}, c{c} {}
+
+		~Line() = default;
+
+		inline
+		std::optional<Line> normalize() const {
+			double n = std::sqrt(a * a + b * b);
+			if (n < TOLERANCE) {
+				return {};
+			}
+			if (c >= 0.0) {
+				return Line{a / n, b / n, c / n};
+			} else {
+				return Line{-a / n, -b / n, -c / n};
+			}
 		}
-		if (c >= 0.0) {
-			return Line{a / n, b / n, c / n};
-		} else {
-			return Line{-a / n, -b / n, -c / n};
-		}
-	}
-};
+	};
+
+}
 
 
 
