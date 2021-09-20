@@ -84,11 +84,11 @@ namespace billiards::utils {
 } while (false)
 
 
-#define RETURN_SUCCESS_WITH_DATA(msg, data) do {			\
-	billiards::utils::DefaultResponse dr{msg, true, &data};	\
-	crow::response resp{billiards::json::dump(dr)};			\
-	resp.add_header("Access-Control-Allow-Origin", "*");	\
-	return resp;			 								\
+#define RETURN_SUCCESS_WITH_DATA(msg, name, data) do {				\
+	billiards::utils::DefaultResponse dr{msg, true, name, &data};	\
+	crow::response resp{billiards::json::dump(dr)};					\
+	resp.add_header("Access-Control-Allow-Origin", "*");			\
+	return resp;			 										\
 } while (false)
 
 

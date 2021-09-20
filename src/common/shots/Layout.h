@@ -69,9 +69,11 @@ namespace billiards::layout {
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
 			writer.key("balls");
+			writer.begin_array();
 			for (const auto& it : balls) {
 				it.to_json(writer);
 			}
+			writer.end_array();
 			writer.key("table-dimensions");
 			table_dims.to_json(writer);
 			writer.end_object();
@@ -80,7 +82,7 @@ namespace billiards::layout {
 		inline
 		void parse(const nlohmann::json& value) override {
 			balls.clear();
-			
+
 			if (value.contains("balls") && value["balls"].is_array()) {
 				for (const auto& it : value["balls"]) {
 					balls.emplace_back(LocatedBall{});

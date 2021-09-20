@@ -13,6 +13,7 @@ namespace billiards::config::ports {
 	constexpr int LAYOUTS_API_PORT = 18083;
 	constexpr int IMAGE_API_PORT = 18084;
 	constexpr int ATTEMPTS_API_PORT = 18085;
+	constexpr int CONFIG_API_PORT = 18086;
 	
 }
 

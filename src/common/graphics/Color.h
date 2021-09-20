@@ -26,7 +26,7 @@ class Color : public json::Serializable {
 			assert(alpha >= 0 && alpha <= 1.0);
 		}
 		
-		Color(double red, double green, double blue) : Color{red, green, blue, 0} {}
+		Color(double red, double green, double blue) : Color{red, green, blue, 1} {}
 		
 		Color() : Color{0, 0, 0} {}
 

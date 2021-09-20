@@ -46,7 +46,7 @@ namespace billiards::gphx {
 			writer.end_object();
 		}
 
-		[[nodiscard]] std::string get_type() const override { return "line"; }
+		[[nodiscard]] std::string get_type() const override { return "lines"; }
 	};
 }
 
