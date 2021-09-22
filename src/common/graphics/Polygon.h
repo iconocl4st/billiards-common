@@ -10,7 +10,7 @@
 #include "ShapeGraphics.h"
 #include "../geometry/Point.h"
 
-namespace billiards::gphx {
+namespace billiards::graphics {
 
 	// For convex polygons...
 	class Polygon : public ShapeGraphics {

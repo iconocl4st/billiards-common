@@ -7,7 +7,7 @@
 
 #include "../utils/Serializable.h"
 
-namespace billiards::gphx {
+namespace billiards::graphics {
 	
 	class GraphicsPrimitive : public json::Serializable {
 	public:

@@ -9,26 +9,38 @@
 
 #include "../utils/Serializable.h"
 
-namespace billiards::gphx {
+namespace billiards::graphics {
 
-class Color : public json::Serializable {
+	class Color : public json::Serializable {
 	public:
-		// TODO: Make these be uint8_t...
-		double red;
-		double green;
-		double blue;
-		double alpha;
+		uint8_t red;
+		uint8_t green;
+		uint8_t blue;
+		uint8_t alpha;
 
-		Color(double red, double green, double blue, double alpha) : red{red}, green{green}, blue{blue}, alpha{alpha} {
-			assert(red >= 0 && red <= 1.0);
-			assert(green >= 0 && green <= 1.0);
-			assert(blue >= 0 && blue <= 1.0);
-			assert(alpha >= 0 && alpha <= 1.0);
-		}
-		
-		Color(double red, double green, double blue) : Color{red, green, blue, 1} {}
-		
-		Color() : Color{0, 0, 0} {}
+		explicit Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha)
+			: red{red}
+			, green{green}
+			, blue{blue}
+			, alpha{alpha}
+		{}
+
+//		explicit Color(uint8_t red, uint8_t green, uint8_t blue)
+//			: Color{red, green, blue, 255}
+//		{}
+//
+		Color() : Color{0, 0, 0, 0} {}
+//
+//		Color(double red, double green, double blue, double alpha)
+//			: Color{(uint8_t) (255 * red)
+//			, (uint8_t) (255 * green)
+//			, (uint8_t) (255 * blue)
+//			, (uint8_t) (255 * alpha)}
+//		{
+//		}
+//
+//		Color(double red, double green, double blue) : Color{red, green, blue, 1} {}
+
 
 		void parse(const nlohmann::json& value) override {
 			if (value.contains("r") && value["r"].is_number()) {
@@ -56,15 +68,43 @@ class Color : public json::Serializable {
 	};
 
 	// multiply defined?
-	const Color RED{1.0, 0.0, 0.0};
-	const Color GREEN{0.0, 1.0, 0.0};
-	const Color BLUE{0.0, 0.0, 1.0};
-	const Color WHITE{1.0, 1.0, 1.0};
-	const Color BLACK{1.0, 1.0, 1.0};
+//	const Color RED{255, 0, 0};
+//	const Color GREEN{0, 255, 0};
+//	const Color BLUE{0, 0, 255};
+//	const Color WHITE{255, 255, 255};
+//	const Color BLACK{0, 0, 0};
 
 	namespace color {
 		inline
-		Color from_int(int r, int g, int b) { return Color{r / 255.0, g / 255.0, b / 255.0}; }
+		Color from_int(int r, int g, int b, int a) {
+			assert(r >= 0 && r <= 255);
+			assert(g >= 0 && g <= 255);
+			assert(b >= 0 && b <= 255);
+			assert(a >= 0 && a <= 255);
+			return Color{(uint8_t) r, (uint8_t) g, (uint8_t) b, (uint8_t) a};
+		}
+		inline
+		Color from_int(int r, int g, int b) {
+			return from_int(r, g, b, 255);
+		}
+
+		inline
+		Color from_double(double r, double g, double b, double a) {
+			assert(r >= 0 && r <= 1.0);
+			assert(g >= 0 && g <= 1.0);
+			assert(b >= 0 && b <= 1.0);
+			assert(a >= 0 && a <= 1.0);
+			return Color{
+				(uint8_t) (255 * r),
+				(uint8_t) (255 * g),
+				(uint8_t) (255 * b),
+				(uint8_t) (255 * a)};
+		}
+
+		inline
+		Color from_double(double r, double g, double b) {
+			return from_double(r, g, b, 1.0);
+		}
 	}
 }
 

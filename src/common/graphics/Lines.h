@@ -12,7 +12,7 @@
 #include "ShapeGraphics.h"
 #include "../geometry/Point.h"
 
-namespace billiards::gphx {
+namespace billiards::graphics {
 
 	class Lines : public ShapeGraphics {
 	public:

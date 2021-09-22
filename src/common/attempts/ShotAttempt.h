@@ -5,21 +5,26 @@
 #ifndef GLVIEW_SHOTATTEMPT_H
 #define GLVIEW_SHOTATTEMPT_H
 
-#include "./Shot.h"
+#include "../shots/Shot.h"
+#include "../shots/Layout.h"
+#include "./AttemptResult.h"
 
-namespace billiards::shots {
+namespace billiards::attempts {
 
 	class ShotAttempt : public json::Serializable {
 	public:
-		Shot shot;
+		layout::Layout layout;
+		shots::Shot shot;
 		uint64_t date;
-		bool success;
+		AttemptResult result;
 
 		ShotAttempt() = default;
 		virtual ~ShotAttempt() = default;
 
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
+			writer.key("shot");
+			writer.
 			writer.end_object();
 		}
 

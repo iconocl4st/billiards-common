@@ -8,28 +8,56 @@
 #include "Lines.h"
 #include "Polygon.h"
 #include "Circle.h"
+#include "Text.h"
+#include "Image.h"
 
-namespace billiards::gphx {
+namespace billiards::graphics {
 	class GraphicsReceiver {
 	public:
 		GraphicsReceiver() = default;
 		virtual ~GraphicsReceiver() = default;
 
-		virtual void receive(const Circle *graphics) const = 0;
-		virtual void receive(const Lines *graphics) const = 0;
-		virtual void receive(const Polygon *graphics) const = 0;
+		virtual void fill(const Circle *graphics) const = 0;
+		virtual void fill(const Lines *graphics) const = 0;
+		virtual void fill(const Polygon *graphics) const = 0;
+
+		virtual void draw(const Circle *graphics) const = 0;
+		virtual void draw(const Lines *graphics) const = 0;
+		virtual void draw(const Polygon *graphics) const = 0;
+
+		virtual void draw(const Text *graphics) const = 0;
+		virtual void draw(const Image *graphics) const = 0;
 
 		void accept(const GraphicsPrimitive *ptr) const {
 			if (ptr == nullptr) {
 				return;
 			}
 			std::string type = ptr->get_type();
-			if (type == "circle") {
-				receive((const Circle *) ptr);
+			if (type == "text") {
+				draw((const Text *) ptr);
+			} else if (type == "image") {
+				draw((const Image *) ptr);
+			} else if (type == "circle") {
+				const auto *s = (const Circle *) ptr;
+				if (s->fill) {
+					fill(s);
+				} else {
+					draw(s);
+				}
 			} else if (type == "lines") {
-				receive((const Lines *) ptr);
+				const auto *s = (const Lines *) ptr;
+				if (s->fill) {
+					fill(s);
+				} else {
+					draw(s);
+				}
 			} else if (type == "polygon") {
-				receive((const Polygon *) ptr);
+				const auto *s = (const Polygon *) ptr;
+				if (s->fill) {
+					fill(s);
+				} else {
+					draw(s);
+				}
 			}
 		}
 	};

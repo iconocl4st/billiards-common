@@ -9,7 +9,7 @@
 
 #include "Color.h"
 
-namespace billiards::gphx {
+namespace billiards::graphics {
 
 	class ShapeGraphics : public GraphicsPrimitive {
 	public:
@@ -17,16 +17,16 @@ namespace billiards::gphx {
 		bool fill;
 		double line_width;
 
-		ShapeGraphics() : color{1, 1, 1}, fill{true}, line_width{0} {}
+		ShapeGraphics() : color{255, 255, 255, 255}, fill{true}, line_width{0} {}
 //		ShapeGraphics(Color color, bool fill) : color{color}, fill{}
 
 		~ShapeGraphics() override = default;
 
 		void parse(const nlohmann::json& value) override {
-			if (value.contains("color") && value.is_object()) {
+			if (value.contains("color") && value["color"].is_object()) {
 				color.parse(value["color"]);
 			}
-			if (value.contains("fill") && value.is_boolean()) {
+			if (value.contains("fill") && value["fill"].is_boolean()) {
 				fill = value["fill"].get<bool>();
 			}
 			if (value.contains("line-width") && value.is_number()) {

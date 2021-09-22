@@ -9,9 +9,9 @@
 #include "Lines.h"
 #include "Polygon.h"
 
-namespace billiards::gphx {
+namespace billiards::graphics {
 	inline
-	std::shared_ptr<gphx::GraphicsPrimitive> parse_graphics(const nlohmann::json& value) {
+	std::shared_ptr<graphics::GraphicsPrimitive> parse_graphics(const nlohmann::json& value) {
 		GraphicsPrimitive *primitive = nullptr;
 		if (!value.contains("type") || !value["type"].is_string()) {
 			return std::shared_ptr<GraphicsPrimitive>{primitive};
