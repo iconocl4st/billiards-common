@@ -21,7 +21,7 @@ public:
 
 	Point(double x, double y) : x{x}, y{y} {}
 	Point() : Point{0, 0} {}
-	Point(const Point& p) : x{p.x}, y{p.y} {}
+//	Point(const Point& p) : x{p.x}, y{p.y} {}
 
 	[[nodiscard]] double norm2() const { return x * x + y * y; }
 	[[nodiscard]] double norm() const { return std::sqrt(norm2()); }

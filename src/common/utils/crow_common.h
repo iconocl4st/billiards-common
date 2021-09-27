@@ -110,5 +110,40 @@ namespace billiards::utils {
 	return resp;			 								\
 } while (false)
 
+// TODO:
+// Shutdown stops the processes from returning...
+#define DO_STATUS_ENDPOINT() do {												\
+	std::mutex shutdown_mutex;													\
+	const uint64_t start_time = std::time(0);									\
+	CROW_ROUTE(app, "/status/")													\
+		.methods("GET"_method, "PUT"_method, "OPTIONS"_method)					\
+		([start_time, &app, &shutdown_mutex](const crow::request& req) {		\
+		if (req.method == "OPTIONS"_method) {									\
+			HANDLE_OPTIONS;														\
+		} else if (req.method == "GET"_method) {								\
+			crow::json::wvalue x;												\
+			x["success"] = true;												\
+			x["message"] = "retrieved uptime";									\
+			x["up-time"] = (std::time(0) - start_time);							\
+			crow::response resp{x};												\
+			resp.add_header("Access-Control-Allow-Origin", "*");				\
+			return resp;														\
+		} else if (req.method == "PUT"_method) {								\
+			nlohmann::json value = nlohmann::json::parse(req.body);				\
+			if (value.contains("shutdown")										\
+				&& value["shutdown"].is_boolean()								\
+				&& value["shutdown"].get<bool>()								\
+			) {																	\
+				app.stop();														\
+				RETURN_SUCCESS("Shutting down");								\
+			}																	\
+			RETURN_SUCCESS("Nothing to do");									\
+		} else {																\
+			return crow::response(404);											\
+		}																		\
+	});                                  										\
+} while (false)
+
+
 
 #endif // GLVIEW_DEFAULT_RESONSE_H
