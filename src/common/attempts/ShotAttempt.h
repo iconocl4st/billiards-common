@@ -6,7 +6,7 @@
 #define GLVIEW_SHOTATTEMPT_H
 
 #include "../shots/Shot.h"
-#include "../shots/Layout.h"
+#include "../shots/Positions.h"
 #include "./AttemptResult.h"
 
 namespace billiards::attempts {

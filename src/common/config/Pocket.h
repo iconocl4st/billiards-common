@@ -24,6 +24,11 @@ namespace billiards::config {
 			, holeCenter{} {}
 		~Pocket() = default;
 
+		[[nodiscard]] geometry::Point center() const {
+			// TODO: remove this method...
+			return (outerSegment1 + outerSegment2) / 2.0;
+		}
+
 		inline
 		geometry::Point innerSegment2() {
 			auto segment = geometry::through(outerSegment1, outerSegment2);

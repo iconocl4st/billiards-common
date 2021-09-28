@@ -5,7 +5,7 @@
 #ifndef GLVIEW_SHOT_H
 #define GLVIEW_SHOT_H
 
-#include <list>
+#include <vector>
 
 #include "ShotStep.h"
 
@@ -13,7 +13,7 @@ namespace billiards::shots {
 
 	class Shot : public json::Serializable {
 	public:
-		std::list<std::shared_ptr<ShotStep>> steps;
+		std::vector<std::shared_ptr<ShotStep>> steps;
 
 		Shot() = default;
 		virtual ~Shot() = default;

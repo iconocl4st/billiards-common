@@ -6,7 +6,7 @@
 #define IDEA_ATTEMPTABLE_H
 
 #include "../shots/Shot.h"
-#include "../shots/Layout.h"
+#include "../shots/Positions.h"
 
 namespace billiards::attempts {
 

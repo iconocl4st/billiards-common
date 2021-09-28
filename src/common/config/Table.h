@@ -8,6 +8,7 @@
 #include "./Ball.h"
 #include "./Pocket.h"
 #include "./Rail.h"
+#include "common/geometry/Dimensions.h"
 
 namespace billiards::config {
 	class Table : public json::Serializable {
@@ -15,6 +16,7 @@ namespace billiards::config {
 		std::array<BallInfo, 16> balls;
 		std::array<Pocket, 6> pockets;
 		std::array<Rail, 6> rails;
+		geometry::Dimensions dims;
 
 		Table() :
 			balls{
@@ -61,7 +63,8 @@ namespace billiards::config {
 					geometry::Point{91.76624319, 47.66666667},
 					geometry::Point{93.66969147, 43.33333333}}
 			},
-			rails{}
+			rails{},
+			dims{92, 46}
 		{
 
 		}
@@ -82,6 +85,8 @@ namespace billiards::config {
 				pocket.to_json(writer);
 			}
 			writer.end_array();
+			writer.key("dimenions");
+			dims.to_json(writer);
 			writer.end_object();
 		};
 
@@ -99,6 +104,9 @@ namespace billiards::config {
 				for (int i=0; i<length; i++) {
 					pockets[i].parse(value["pockets"][i]);
 				}
+			}
+			if (value.contains("dimensions") && value["dimensions"].is_object()) {
+				dims.parse(value["dimensions"]);
 			}
 		};
 	};
