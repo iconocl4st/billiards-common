@@ -46,7 +46,7 @@ namespace billiards::json {
 				stack.back().second[current_key] = nlohmann::json::object();
 				stack.emplace_back(context_type::IN_OBJECT, stack.back().second[current_key]);
 			} else if (stack.back().first == context_type::IN_ARRAY) {
-				auto len = stack.back().second.size();
+//				auto len = stack.back().second.size();
 				stack.back().second.push_back(nlohmann::json::object());
 				stack.emplace_back(context_type::IN_OBJECT, stack.back().second.back());
 			} else {
