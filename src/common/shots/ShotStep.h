@@ -11,62 +11,64 @@
 
 namespace billiards::shots {
 
-	enum ShotStepType {
-		CUE,
-		STRIKE,
-		RAIL,
-		KISS,
-		POCKET,
-		UNKNOWN,
+	namespace step_type {
+		enum ShotStepType {
+			CUE,
+			STRIKE,
+			RAIL,
+			KISS,
+			POCKET,
+			UNKNOWN,
 
-		// masse, jump
-	};
+			// masse, jump
+		};
 
-	std::string step_type_to_string(const ShotStepType type) {
-		switch (type) {
-			case CUE:
-				return "cue";
-			case STRIKE:
-				return "strike";
-			case RAIL:
-				return "rail";
-			case KISS:
-				return "kiss";
-			case POCKET:
-				return "pocket";
-			default:
-				return "unknown";
+		std::string to_string(const ShotStepType type) {
+			switch (type) {
+				case CUE:
+					return "cue";
+				case STRIKE:
+					return "strike";
+				case RAIL:
+					return "rail";
+				case KISS:
+					return "kiss";
+				case POCKET:
+					return "pocket";
+				default:
+					return "unknown";
+			}
 		}
-	}
 
-	ShotStepType string_to_step_type(const std::string& str) {
-		if (str == "cue") {
-			return CUE;
-		} else if (str == "strike") {
-			return STRIKE;
-		} else if (str == "rail") {
-			return RAIL;
-		} else if (str == "kiss") {
-			return KISS;
-		} else if (str == "pocket") {
-			return POCKET;
-		} else {
-			return UNKNOWN;
+		ShotStepType from_string(const std::string& str) {
+			if (str == "cue") {
+				return CUE;
+			} else if (str == "strike") {
+				return STRIKE;
+			} else if (str == "rail") {
+				return RAIL;
+			} else if (str == "kiss") {
+				return KISS;
+			} else if (str == "pocket") {
+				return POCKET;
+			} else {
+				return UNKNOWN;
+			}
 		}
 	}
 
 	class ShotStep : public json::Serializable {
 	public:
-		ShotStepType type;
+		step_type::ShotStepType type;
 
-		ShotStep(ShotStepType type) : type{type} {}
+		ShotStep(step_type::ShotStepType type) : type{type} {}
 		virtual ~ShotStep() = default;
 
 		virtual void write_details(json::SaxWriter& writer) const = 0;
 
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
-			writer.field("type", step_type_to_string(type));
+			writer.field("type", step_type::to_string(type));
 			write_details(writer);
 			writer.end_object();
 		}
@@ -74,10 +76,11 @@ namespace billiards::shots {
 
 	class PocketStep : public ShotStep {
 	public:
+		// size_t?
 		int pocket;
 
 		PocketStep(int pocket)
-			: ShotStep{POCKET}
+			: ShotStep{step_type::POCKET}
 			, pocket{pocket}
 			{}
 
@@ -102,7 +105,7 @@ namespace billiards::shots {
 		int kissed_ball;
 
 		KissStep(int kissed)
-			: ShotStep{KISS}
+			: ShotStep{step_type::KISS}
 			, kissed_ball{kissed}
 		{}
 
@@ -127,7 +130,7 @@ namespace billiards::shots {
 		int cue_ball;
 
 		CueStep(int cue_ball)
-			: ShotStep{CUE}
+			: ShotStep{step_type::CUE}
 			,  cue_ball{cue_ball}
 		{}
 
@@ -152,7 +155,7 @@ namespace billiards::shots {
 		int object_ball;
 
 		StrikeStep(int object_ball)
-			: ShotStep{STRIKE}
+			: ShotStep{step_type::STRIKE}
 			, object_ball{object_ball}
 		{}
 
@@ -177,7 +180,7 @@ namespace billiards::shots {
 		int rail;
 
 		RailStep(int rail)
-			: ShotStep{RAIL}
+			: ShotStep{step_type::RAIL}
 			, rail{rail}
 		{}
 
@@ -197,19 +200,19 @@ namespace billiards::shots {
 	};
 
 	namespace step {
-		ShotStep *from_type(ShotStepType type) {
+		ShotStep *from_type(step_type::ShotStepType type) {
 			switch (type) {
-				case CUE:
+				case step_type::CUE:
 					return new CueStep;
-				case STRIKE:
+				case step_type::STRIKE:
 					return new StrikeStep;
-				case RAIL:
+				case step_type::RAIL:
 					return new RailStep;
-				case KISS:
+				case step_type::KISS:
 					return new KissStep;
-				case POCKET:
+				case step_type::POCKET:
 					return new PocketStep;
-				case UNKNOWN:
+				case step_type::UNKNOWN:
 				default:
 					return nullptr;
 			}
@@ -220,7 +223,7 @@ namespace billiards::shots {
 				return nullptr;
 			}
 
-			ShotStepType type = string_to_step_type(value["type"].get<std::string>());
+			step_type::ShotStepType type = step_type::from_string(value["type"].get<std::string>());
 			ShotStep *ret = from_type(type);
 			if (ret != nullptr) {
 				ret->parse(value);

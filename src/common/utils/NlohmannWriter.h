@@ -14,14 +14,16 @@
 
 namespace billiards::json {
 
-	enum ContextType {
-		IN_OBJECT,
-		IN_ARRAY,
-	};
+	namespace context_type {
+		enum ContextType {
+			IN_OBJECT,
+			IN_ARRAY,
+		};
+	}
 
 	class NlohmannWriter : public SaxWriter {
 	private:
-		std::list<std::pair<ContextType, nlohmann::json&>> stack;
+		std::list<std::pair<context_type::ContextType, nlohmann::json&>> stack;
 		std::string current_key;
 		nlohmann::json root;
 
@@ -31,7 +33,7 @@ namespace billiards::json {
 
 		void debug_stack() const {
 			for (const auto & it : stack) {
-				std::cout << (it.first == IN_OBJECT ? "o" : "a") << "," << it.second << '\n';
+				std::cout << (it.first == context_type::IN_OBJECT ? "o" : "a") << "," << it.second << '\n';
 			}
 			std::cout << "=============================================" << std::endl;
 		}
@@ -39,14 +41,14 @@ namespace billiards::json {
 		void begin_object() override {
 			if (stack.empty()) {
 				root = nlohmann::json::object();
-				stack.emplace_back(IN_OBJECT, root);
-			} else if (stack.back().first == IN_OBJECT) {
+				stack.emplace_back(context_type::IN_OBJECT, root);
+			} else if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = nlohmann::json::object();
-				stack.emplace_back(IN_OBJECT, stack.back().second[current_key]);
-			} else if (stack.back().first == IN_ARRAY) {
+				stack.emplace_back(context_type::IN_OBJECT, stack.back().second[current_key]);
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				auto len = stack.back().second.size();
 				stack.back().second.push_back(nlohmann::json::object());
-				stack.emplace_back(IN_OBJECT, stack.back().second.back());
+				stack.emplace_back(context_type::IN_OBJECT, stack.back().second.back());
 			} else {
 				std::cerr << "Unknown context" << std::endl;
 			}
@@ -59,14 +61,14 @@ namespace billiards::json {
 		void begin_array() override {
 			if (stack.empty()) {
 				root = nlohmann::json::array();
-				stack.emplace_back(IN_ARRAY, root);
-			} else if (stack.back().first == IN_OBJECT) {
+				stack.emplace_back(context_type::IN_ARRAY, root);
+			} else if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = nlohmann::json::array();
-				stack.emplace_back(IN_ARRAY, stack.back().second[current_key]);
-			} else if (stack.back().first == IN_ARRAY) {
+				stack.emplace_back(context_type::IN_ARRAY, stack.back().second[current_key]);
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				auto len = stack.back().second.size();
 				stack.back().second.push_back(nlohmann::json::array());
-				stack.emplace_back(IN_ARRAY, stack.back().second[len]);
+				stack.emplace_back(context_type::IN_ARRAY, stack.back().second[len]);
 			} else {
 				std::cerr << "Unknown context" << std::endl;
 			}
@@ -80,9 +82,9 @@ namespace billiards::json {
 		}
 
 		void value(int val) override {
-			if (stack.back().first == IN_OBJECT) {
+			if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = val;
-			} else if (stack.back().first == IN_ARRAY) {
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				stack.back().second.push_back(val);
 			} else {
 				std::cerr << "Unknown context" << std::endl;
@@ -90,9 +92,9 @@ namespace billiards::json {
 		}
 
 		void value(uint8_t val) override {
-			if (stack.back().first == IN_OBJECT) {
+			if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = val;
-			} else if (stack.back().first == IN_ARRAY) {
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				stack.back().second.push_back(val);
 			} else {
 				std::cerr << "Unknown context" << std::endl;
@@ -100,9 +102,9 @@ namespace billiards::json {
 		}
 
 		void value(uint64_t val) override {
-			if (stack.back().first == IN_OBJECT) {
+			if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = val;
-			} else if (stack.back().first == IN_ARRAY) {
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				stack.back().second.push_back(val);
 			} else {
 				std::cerr << "Unknown context" << std::endl;
@@ -110,36 +112,36 @@ namespace billiards::json {
 		}
 
 		void value(bool val) override {
-			if (stack.back().first == IN_OBJECT) {
+			if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = val;
-			} else if (stack.back().first == IN_ARRAY) {
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				stack.back().second.push_back(val);
 			} else {
 				std::cerr << "Unknown context" << std::endl;
 			}
 		}
 		void value(const std::string &val) override {
-			if (stack.back().first == IN_OBJECT) {
+			if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = val;
-			} else if (stack.back().first == IN_ARRAY) {
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				stack.back().second.push_back(val);
 			} else {
 				std::cerr << "Unknown context" << std::endl;
 			}
 		}
 		void value(double val) override {
-			if (stack.back().first == IN_OBJECT) {
+			if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = val;
-			} else if (stack.back().first == IN_ARRAY) {
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				stack.back().second.push_back(val);
 			} else {
 				std::cerr << "Unknown context" << std::endl;
 			}
 		}
 		void null() override {
-			if (stack.back().first == IN_OBJECT) {
+			if (stack.back().first == context_type::IN_OBJECT) {
 				stack.back().second[current_key] = nullptr;
-			} else if (stack.back().first == IN_ARRAY) {
+			} else if (stack.back().first == context_type::IN_ARRAY) {
 				stack.back().second.push_back(nullptr);
 			} else {
 				std::cerr << "Unknown context" << std::endl;

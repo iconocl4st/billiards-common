@@ -30,11 +30,10 @@ namespace billiards::config {
 		}
 
 		inline
-		geometry::Point innerSegment2() {
+		geometry::MaybePoint innerSegment2() {
 			auto segment = geometry::through(outerSegment1, outerSegment2);
 			auto normal = geometry::orthogonal_at(segment, (outerSegment1 + outerSegment2) / 2);
-			auto refl = geometry::reflect(innerSegment1, normal);
-			return refl.value_or(innerSegment1);
+			return geometry::reflect(innerSegment1, normal);
 		}
 
 		void to_json(json::SaxWriter& writer) const {

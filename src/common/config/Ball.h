@@ -11,60 +11,62 @@
 
 namespace billiards::config {
 
-	enum BallType {
-		SOLID,
-		STRIPE,
-		CUE,
-		UNINITIALIZED,
-	};
+	namespace ball_type {
+		enum BallType {
+			SOLID,
+			STRIPE,
+			CUE,
+			UNKNOWN,
+		};
 
-	std::string ball_type_to_string(BallType type) {
-		switch (type) {
-			case SOLID:
-				return "solid";
-			case STRIPE:
-				return "stripe";
-			case CUE:
-				return "cue";
-			case UNINITIALIZED:
-			default:
-				return "unknown";
+		std::string to_string(BallType type) {
+			switch (type) {
+				case SOLID:
+					return "solid";
+				case STRIPE:
+					return "stripe";
+				case CUE:
+					return "cue";
+				case UNKNOWN:
+				default:
+					return "unknown";
+			}
 		}
-	}
 
-	BallType string_to_ball_type(const std::string& str) {
-		if (str == "solid") {
-			return SOLID;
-		} else if (str == "stripe") {
-			return STRIPE;
-		} else if (str == "cue") {
-			return CUE;
-		} else {
-			return UNINITIALIZED;
+		BallType from_string(const std::string& str) {
+			if (str == "solid") {
+				return SOLID;
+			} else if (str == "stripe") {
+				return STRIPE;
+			} else if (str == "cue") {
+				return CUE;
+			} else {
+				return UNKNOWN;
+			}
 		}
 	}
 
 
 	class BallInfo : json::Serializable {
 	public:
-		BallType ball_type;
+		ball_type::BallType ball_type;
 		double radius;
 		graphics::Color color;
 		int number;
 		std::string name;
 		
-		BallInfo(BallType ball_type, double radius, graphics::Color color, int number, const char *name) :
+		BallInfo(ball_type::BallType ball_type, double radius, graphics::Color color, int number, const char *name) :
 			ball_type{ball_type},
 			radius{radius},
 			color{color},
 			number{number},
 			name{name} {}
 
-		BallInfo() : BallInfo{UNINITIALIZED, -1, graphics::Color{0, 0, 0, 0}, -1, "uninitialized"} {}
+		BallInfo() : BallInfo{ball_type::UNKNOWN, -1, graphics::Color{0, 0, 0, 0}, -1, "uninitialized"} {}
 
 		~BallInfo() = default;
 
-		bool is_cue() const { return ball_type == CUE; }
+		bool is_cue() const { return ball_type == ball_type::CUE; }
 
 		bool operator==(const BallInfo& other) const {
 			return number == other.number /* && ball_type == other.ball_type */;
@@ -77,7 +79,7 @@ namespace billiards::config {
 			writer.field("name", name);
 			writer.key("color");
 			color.to_json(writer);
-			writer.field("ball-type", ball_type_to_string(ball_type));
+			writer.field("ball-type", ball_type::to_string(ball_type));
 			writer.end_object();
 		}
 		
@@ -95,7 +97,7 @@ namespace billiards::config {
 				name = value["name"].get<std::string>();
 			}
 			if (value.contains("ball-type") && value["ball-type"].is_string()) {
-				ball_type = string_to_ball_type(value["ball-type"].get<std::string>());
+				ball_type = ball_type::from_string(value["ball-type"].get<std::string>());
 			}
 		}
 
@@ -104,22 +106,22 @@ namespace billiards::config {
 	namespace balls {
 		inline
 		std::array<BallInfo, 16> ALL_BALLS(){ return std::array<BallInfo, 16>{
-			 BallInfo{   CUE, 2.26 / 2, graphics::color::from_int(255, 255, 255),  0, "cue"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int(255, 245,  64),  1, "one"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int( 43,  59, 179),  2, "two"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int(255,   0,   0),  3, "three"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int( 26,   1,  94),  4, "four"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int(255, 159,  41),  5, "five"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int(  9, 148,  30),  6, "six"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int(255,  25,  98),  7, "seven"},
-			 BallInfo{ SOLID, 2.26 / 2, graphics::color::from_int(  0,   0,   0),  8, "eight"},
-			 BallInfo{STRIPE, 2.26 / 2, graphics::color::from_int(255, 245,  64),  9, "nine"},
-			 BallInfo{STRIPE, 2.26 / 2, graphics::color::from_int( 43,  59, 179), 10, "ten"},
-			 BallInfo{STRIPE, 2.26 / 2, graphics::color::from_int(255,   0,   0), 11, "eleven"},
-			 BallInfo{STRIPE, 2.26 / 2, graphics::color::from_int( 26,   1,  94), 12, "twelve"},
-			 BallInfo{STRIPE, 2.26 / 2, graphics::color::from_int(255, 159,  41), 13, "thirteen"},
-			 BallInfo{STRIPE, 2.26 / 2, graphics::color::from_int(  9, 148,  30), 14, "fourteen"},
-			 BallInfo{STRIPE, 2.26 / 2, graphics::color::from_int(255,  25,  98), 15, "fifteen"},
+			 BallInfo{   ball_type::CUE, 2.26 / 2, graphics::color::from_int(255, 255, 255),  0, "cue"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(255, 245,  64),  1, "one"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int( 43,  59, 179),  2, "two"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(255,   0,   0),  3, "three"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int( 26,   1,  94),  4, "four"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(255, 159,  41),  5, "five"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(  9, 148,  30),  6, "six"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(255,  25,  98),  7, "seven"},
+			 BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(  0,   0,   0),  8, "eight"},
+			 BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(255, 245,  64),  9, "nine"},
+			 BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int( 43,  59, 179), 10, "ten"},
+			 BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(255,   0,   0), 11, "eleven"},
+			 BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int( 26,   1,  94), 12, "twelve"},
+			 BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(255, 159,  41), 13, "thirteen"},
+			 BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(  9, 148,  30), 14, "fourteen"},
+			 BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(255,  25,  98), 15, "fifteen"},
 		}; }
 	}
 }

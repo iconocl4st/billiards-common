@@ -15,6 +15,11 @@
 
 namespace billiards::geometry {
 
+
+	/*
+	 *
+	 * Maybe this should not be serializable...
+	 */
 class Point : public billiards::json::Serializable  {
 public:
 	double x, y;

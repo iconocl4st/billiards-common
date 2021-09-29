@@ -30,8 +30,8 @@ namespace billiards::shots {
 		}
 
 		void parse(const nlohmann::json& value) override {
-			steps.clear();
 			if (value.contains("steps") && value["steps"].is_array()) {
+				steps.clear();
 				for (const auto& it : value["steps"]) {
 					steps.emplace_back(step::parse(it));
 				}

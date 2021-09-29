@@ -9,58 +9,60 @@
 
 namespace billiards::layout::vball {
 
-	enum VirtualBallType {
-		CUE,
-		ANY_OBJECT,
-		NUMBER,
-		UNKNOWN,
-	};
+	namespace virtual_type {
+		enum VirtualBallType {
+			CUE,
+			ANY_OBJECT,
+			NUMBER,
+			UNKNOWN,
+		};
 
-	std::string virtual_ball_to_string(VirtualBallType type) {
-		switch (type) {
-			case CUE:
-				return "cue";
-			case ANY_OBJECT:
-				return "object";
-			case NUMBER:
-				return "number";
-			case UNKNOWN:
-			default:
-				return "unknown";
+		std::string to_string(VirtualBallType type) {
+			switch (type) {
+				case CUE:
+					return "cue";
+				case ANY_OBJECT:
+					return "object";
+				case NUMBER:
+					return "number";
+				case UNKNOWN:
+				default:
+					return "unknown";
+			}
 		}
-	}
 
-	VirtualBallType string_to_virtual_ball(const std::string& type) {
-		if (type == "cue") {
-			return CUE;
-		} else if (type == "object") {
-			return ANY_OBJECT;
-		} else if (type == "number") {
-			return NUMBER;
-		} else {
-			return UNKNOWN;
+		VirtualBallType from_string(const std::string& type) {
+			if (type == "cue") {
+				return CUE;
+			} else if (type == "object") {
+				return ANY_OBJECT;
+			} else if (type == "number") {
+				return NUMBER;
+			} else {
+				return UNKNOWN;
+			}
 		}
 	}
 
 	class VirtualBall : public json::Serializable {
 	public:
-		VirtualBallType type;
+		virtual_type::VirtualBallType type;
 		int number;
 
-		VirtualBall(int number) : type{vball::NUMBER}, number{number} {}
-		VirtualBall() : type{vball::ANY_OBJECT}, number{-1} {}
+		VirtualBall(int number) : type{virtual_type::NUMBER}, number{number} {}
+		VirtualBall() : type{virtual_type::ANY_OBJECT}, number{-1} {}
 
 		~VirtualBall() override = default;
 
 		[[nodiscard]] bool is_cue() const {
-			return type == CUE;
+			return type == virtual_type::CUE;
 		}
 
 		inline
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
-			writer.field("type", vball::virtual_ball_to_string(type));
-			if (type == vball::NUMBER) {
+			writer.field("type", virtual_type::to_string(type));
+			if (type == virtual_type::NUMBER) {
 				writer.field("number", number);
 			}
 			writer.end_object();
@@ -68,11 +70,11 @@ namespace billiards::layout::vball {
 
 		inline
 		void parse(const nlohmann::json& value) override {
-			type = vball::UNKNOWN;
+			type = virtual_type::UNKNOWN;
 			if (value.contains("type") && value["type"].is_string()) {
-				type = vball::string_to_virtual_ball(value["type"].get<std::string>());
+				type = virtual_type::from_string(value["type"].get<std::string>());
 			}
-			if (type == vball::NUMBER && value.contains("number") && value["number"].is_number())
+			if (type == virtual_type::NUMBER && value.contains("number") && value["number"].is_number())
 				number = value["number"].get<int>();
 		}
 	};
