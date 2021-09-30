@@ -17,20 +17,28 @@ namespace billiards::graphics {
 		bool fill;
 		double line_width;
 
-		ShapeGraphics() : color{255, 255, 255, 255}, fill{true}, line_width{0} {}
+		ShapeGraphics() : color{255, 255, 255, 255}, fill{true}, line_width{-1} {}
 //		ShapeGraphics(Color color, bool fill) : color{color}, fill{}
 
 		~ShapeGraphics() override = default;
 
 		void parse(const nlohmann::json& value) override {
-			if (value.contains("color") && value["color"].is_object()) {
-				color.parse(value["color"]);
+			if (!value.contains("color") || !value["color"].is_object()) {
+				throw std::runtime_error{"shapes must have a color"};
 			}
-			if (value.contains("fill") && value["fill"].is_boolean()) {
+			color.parse(value["color"]);
+
+			bool has_fill = value.contains("fill") && value["fill"].is_boolean();
+			bool has_width = value.contains("line-width") && value["line-width"].is_number();
+			if (!has_fill && !has_width) {
+				throw std::runtime_error{"shapes must either have a fill or a line width"};
+			}
+			if (has_fill) {
 				fill = value["fill"].get<bool>();
 			}
-			if (value.contains("line-width") && value.is_number()) {
+			if (has_width) {
 				line_width = value["line-width"].get<double>();
+				fill = false;
 			}
 		}
 
@@ -39,8 +47,12 @@ namespace billiards::graphics {
 
 			writer.key("color");
 			color.to_json(writer);
-			writer.field("fill", fill);
-			writer.field("line-width", line_width);
+
+			if (fill) {
+				writer.field("fill", true);
+			} else {
+				writer.field("line-width", line_width);
+			}
 		}
 	};
 

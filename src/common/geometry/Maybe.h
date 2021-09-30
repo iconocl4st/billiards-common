@@ -6,6 +6,7 @@
 #define IDEA_MAYBE_H
 
 #include "./Point.h"
+#include "./Line.h"
 
 /*
  *
@@ -70,7 +71,7 @@ namespace billiards::geometry {
 					return true;
 				case bv::UNKNOWN:
 				default:
-					throw std::runtime_error{"No value"};
+					throw std::runtime_error{"No value for bool"};
 			}
 		}
 
@@ -161,7 +162,7 @@ namespace billiards::geometry {
 		[[nodiscard]] inline
 		double get() const {
 			if (!is_valid()) {
-				throw std::runtime_error{"No value"};
+				throw std::runtime_error{"No value for double"};
 			}
 			return value;
 		}
@@ -360,9 +361,14 @@ namespace billiards::geometry {
 		[[nodiscard]] inline
 		Point point() const {
 			if (!is_valid()) {
-				throw std::runtime_error{"No value"};
+				throw std::runtime_error{"No value for point"};
 			}
 			return Point{x.value, y.value};
+		}
+
+		[[nodiscard]] inline
+		Point get() const {
+			return point();
 		}
 
 		[[nodiscard]] inline
@@ -433,6 +439,11 @@ namespace billiards::geometry {
 		[[nodiscard]] inline
 		MaybeDouble at(const MaybePoint& point) const {
 			return MaybeDouble{a * point.x + b * point.y + c};
+		}
+
+		[[nodiscard]] inline
+		Line get() const {
+			return Line{a.get(), b.get(), c.get()};
 		}
 	};
 

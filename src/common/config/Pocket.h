@@ -9,6 +9,69 @@
 
 namespace billiards::config {
 
+	namespace horz_loc {
+		enum HorizontalLocation {
+			LEFT,
+			MIDDLE,
+			RIGHT,
+			UNKNOWN,
+		};
+
+		[[nodiscard]] inline
+		std::string to_string(HorizontalLocation h) {
+			switch (h) {
+				case RIGHT:
+					return "right";
+				case LEFT:
+					return "left";
+				case MIDDLE:
+					return "middle";
+				case UNKNOWN:
+				default:
+					return "unknown";
+			}
+		}
+	}
+	namespace vert_loc {
+		enum VerticalLocation {
+			LOWER,
+			UPPER,
+			UNKNOWN,
+		};
+
+		[[nodiscard]] inline
+		std::string to_string(VerticalLocation h) {
+			switch (h) {
+				case LOWER:
+					return "right";
+				case UPPER:
+					return "left";
+				case UNKNOWN:
+				default:
+					return "unknown";
+			}
+		}
+	}
+	class PocketOrientation {
+	public:
+		horz_loc::HorizontalLocation horizontal;
+		vert_loc::VerticalLocation vertical;
+
+		PocketOrientation(horz_loc::HorizontalLocation h, vert_loc::VerticalLocation v)
+			: horizontal{h}
+			, vertical{v}
+			{}
+
+		PocketOrientation() : PocketOrientation{horz_loc::UNKNOWN, vert_loc::UNKNOWN} {}
+		~PocketOrientation() = default;
+
+		std::string to_string() const {
+			std::stringstream ss{};
+			ss << horz_loc::to_string(horizontal) << " " << vert_loc::to_string(vertical);
+			return ss.str();
+		}
+	};
+
 	class Pocket : public json::Serializable {
 	public:
 		geometry::Point outerSegment1;
@@ -16,21 +79,25 @@ namespace billiards::config {
 		geometry::Point innerSegment1;
 		geometry::Point holeCenter;
 
+		PocketOrientation orientation;
+
 		Pocket() = default;
 		Pocket(geometry::Point outerSegment1, geometry::Point innerSegment1, geometry::Point outerSegment2)
 			: outerSegment1{outerSegment1}
 			, outerSegment2{outerSegment2}
 			, innerSegment1{innerSegment1}
-			, holeCenter{} {}
+			, holeCenter{}
+			, orientation{}
+		{}
 		~Pocket() = default;
 
 		[[nodiscard]] geometry::Point center() const {
 			// TODO: remove this method...
-			return (outerSegment1 + outerSegment2) / 2.0;
+			return (outerSegment1 + outerSegment2 + innerSegment1 + innerSegment2().point()) / 4.0;
 		}
 
-		inline
-		geometry::MaybePoint innerSegment2() {
+		[[nodiscard]] inline
+		geometry::MaybePoint innerSegment2() const {
 			auto segment = geometry::through(outerSegment1, outerSegment2);
 			auto normal = geometry::orthogonal_at(segment, (outerSegment1 + outerSegment2) / 2);
 			return geometry::reflect(innerSegment1, normal);

@@ -30,6 +30,14 @@ namespace billiards::layout {
 			}
 			return -1;
 		}
+
+		[[nodiscard]] inline
+		geometry::Point get_ball_location(int index) const {
+			if (index < 0 || index >= balls.size()) {
+				throw std::runtime_error{"Invalid index"};
+			}
+			return balls[index].location;
+		}
 		
 		inline
 		void to_json(json::SaxWriter& writer) const override {

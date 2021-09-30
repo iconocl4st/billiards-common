@@ -91,6 +91,13 @@ namespace billiards::utils {
 	return resp;			 										\
 } while (false)
 
+#define RETURN_ERROR(msg) do {								\
+	billiards::utils::DefaultResponse dr{msg, false};		\
+	crow::response resp{billiards::json::dump(dr)};			\
+	resp.add_header("Access-Control-Allow-Origin", "*");	\
+	return resp;			 								\
+} while (false)
+
 
 #define RETURN_SUCCESS(msg) do {							\
 	crow::json::wvalue x; 									\

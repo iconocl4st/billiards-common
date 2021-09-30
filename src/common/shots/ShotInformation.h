@@ -14,7 +14,43 @@ namespace billiards::shots {
 	public:
 		Shot shot;
 		CueingInfo cueing;
-		std::vector<std::shared_ptr<Destination>> destinations;
+		std::vector<Destination> destinations;
+
+		[[nodiscard]] inline
+		std::shared_ptr<ShotStep>& get_step(const Destination& dest) {
+			const int step_index = dest.step_index;
+			if (step_index < 0 || step_index >= shot.steps.size()) {
+				throw std::runtime_error{"Invalid index"};
+			}
+			return shot.steps[step_index];
+		}
+
+		[[nodiscard]] inline
+		const std::shared_ptr<ShotStep>& get_step(const Destination& dest) const {
+			const int step_index = dest.step_index;
+			if (step_index < 0 || step_index >= shot.steps.size()) {
+				throw std::runtime_error{"Invalid index"};
+			}
+			return shot.steps[step_index];
+		}
+
+		template<class StepType>
+		std::shared_ptr<StepType> get_typed_step(const Destination& dest) {
+			return std::dynamic_pointer_cast<StepType>(get_step(dest));
+		}
+
+		[[nodiscard]] inline
+		step_type::ShotStepType get_shot_type(const Destination& dest) const {
+			return get_step(dest)->type;
+		}
+
+		[[nodiscard]] inline
+		step_type::ShotStepType get_shot_type(int dest_index) const {
+			if (dest_index < 0 || dest_index >= destinations.size()) {
+				throw std::runtime_error{"Invalid destination index"};
+			}
+			return get_shot_type(destinations[dest_index]);
+		}
 
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
@@ -25,7 +61,7 @@ namespace billiards::shots {
 			writer.key("destinations");
 			writer.begin_array();
 			for (const auto& dest : destinations) {
-				dest->to_json(writer);
+				dest.to_json(writer);
 			}
 			writer.end_array();
 			writer.end_object();
@@ -41,7 +77,8 @@ namespace billiards::shots {
 			if (value.contains("destinations") && value["destinations"].is_array()) {
 				destinations.clear();
 				for (const auto& it : value["destinations"]) {
-					destinations.emplace_back(destinations::parse(it));
+					destinations.emplace_back();
+					destinations.back().parse(it);
 				}
 			}
 

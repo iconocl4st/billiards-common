@@ -9,7 +9,7 @@
 
 namespace billiards::geometry {
 
-	inline
+	[[nodiscard]] inline
 	MaybeLine through(const MaybePoint& p1, const MaybePoint& p2) {
 //		a * p1.x + b * p1.y + c == 0
 //		a * p2.x + b * p3.y + c == 0
@@ -19,18 +19,23 @@ namespace billiards::geometry {
 		return MaybeLine{p1.y - p2.y, p2.x - p1.x, p1.x * p2.y - p1.y * p2.x};
 	}
 
-	inline
+	[[nodiscard]] inline
 	MaybeDouble distance_to(const MaybeLine& line, const MaybePoint& point) {
 		auto l = line.normalize();
 		return (l.c - l.a * point.x + l.b * point.y).abs();
 	}
 
-	inline
+	[[nodiscard]] inline
 	MaybeLine orthogonal_at(const MaybeLine& line, const MaybePoint& point)  {
 		return MaybeLine{line.b, -line.a, -line.b * point.x + line.a * point.y};
 	}
 
-	inline
+	[[nodiscard]] inline
+	MaybeLine parallel_at(const MaybeLine& line, const MaybePoint& point) {
+		return MaybeLine{line.a, line.b, -line.a * point.x - line.b * point.y};
+	}
+
+	[[nodiscard]] inline
 	MaybePoint intersection(const MaybeLine& l1, const MaybeLine& l2) {
 		auto hx = l1.b * l2.c - l1.c * l2.b;
 		auto hy = l1.c * l2.a - l1.a * l2.c;
@@ -38,7 +43,7 @@ namespace billiards::geometry {
 		return MaybePoint{hx / hz, hy / hz};
 	}
 
-	inline
+	[[nodiscard]] inline
 	MaybePoint projection(const MaybeLine& line, const MaybePoint& point) {
 		auto d = distance_to(line, point);
 		if ((d.abs() < TOLERANCE).get_or(false)) {
@@ -51,7 +56,7 @@ namespace billiards::geometry {
 //		return Point{};
 	}
 
-	inline
+	[[nodiscard]] inline
 	MaybePoint reflect(const MaybePoint& point, const MaybeLine& line) {
 		auto p = projection(line, point);
 		return point + (p - point) * 2;

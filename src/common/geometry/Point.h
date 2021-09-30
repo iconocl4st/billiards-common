@@ -35,6 +35,7 @@ public:
 	}
 
 	void parse(const nlohmann::json& value) override {
+		// TODO: Should these be required?
 		if (value.contains("x") && value["x"].is_number()) {
 			x = value["x"].get<double>();
 		}

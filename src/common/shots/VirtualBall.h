@@ -17,6 +17,35 @@ namespace billiards::layout::vball {
 			UNKNOWN,
 		};
 
+		[[nodiscard]] inline
+		bool is_cue_ball(VirtualBallType type) {
+			switch (type) {
+				case CUE:
+					return true;
+				case NUMBER:
+				case ANY_OBJECT:
+					return false;
+				case UNKNOWN:
+				default:
+					throw std::runtime_error{"Unknown virtual ball type"};
+			}
+		}
+
+		[[nodiscard]] inline
+		bool is_object_ball(VirtualBallType type) {
+			switch (type) {
+				case NUMBER:
+				case ANY_OBJECT:
+					return true;
+				case CUE:
+					return false;
+				case UNKNOWN:
+				default:
+					throw std::runtime_error{"Unknown virtual ball type"};
+			}
+		}
+
+		[[nodiscard]] inline
 		std::string to_string(VirtualBallType type) {
 			switch (type) {
 				case CUE:
@@ -31,6 +60,7 @@ namespace billiards::layout::vball {
 			}
 		}
 
+		[[nodiscard]] inline
 		VirtualBallType from_string(const std::string& type) {
 			if (type == "cue") {
 				return CUE;

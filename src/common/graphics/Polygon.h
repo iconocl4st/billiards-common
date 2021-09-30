@@ -15,7 +15,7 @@ namespace billiards::graphics {
 	// For convex polygons...
 	class Polygon : public ShapeGraphics {
 	public:
-		std::list<geometry::Point> vertices;
+		std::vector<geometry::Point> vertices;
 
 		Polygon() = default;
 		~Polygon() override = default;

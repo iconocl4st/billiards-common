@@ -21,6 +21,11 @@ namespace billiards::layout {
 		LocatedBall() : ball{}, location{} {}
 		~LocatedBall() = default;
 
+		[[nodiscard]] inline
+		vball::virtual_type::VirtualBallType get_type() const {
+			return ball.type;
+		}
+
 		inline
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();

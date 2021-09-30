@@ -18,14 +18,14 @@ namespace billiards::graphics {
 		Color color;
 		geometry::Point location;
 		std::string text;
-		std::string font;
+		std::string font_family;
 		double font_size;
 
 		Text()
 			: color{1, 1, 1, 1}
 			, text{}
-			, font{}
-			, font_size{}
+			, font_family{"DejaVu Sans Mono"}
+			, font_size{16}
 			{}
 
 		~Text() override = default;
@@ -43,8 +43,8 @@ namespace billiards::graphics {
 			if (value.contains("text") && value["text"].is_string()) {
 				text = value["text"].get<std::string>();
 			}
-			if (value.contains("font") && value["font"].is_string()) {
-				font = value["font"].get<std::string>();
+			if (value.contains("font-family") && value["font-family"].is_string()) {
+				font_family = value["font-family"].get<std::string>();
 			}
 			if (value.contains("font-size") && value.is_number()) {
 				font_size = value["font-size"].get<double>();
@@ -59,7 +59,7 @@ namespace billiards::graphics {
 			writer.key("location");
 			location.to_json(writer);
 			writer.field("text", text);
-			writer.field("font", font);
+			writer.field("font-family", font_family);
 			writer.field("font-size", font_size);
 			writer.end_object();
 		}

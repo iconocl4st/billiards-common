@@ -18,12 +18,12 @@ namespace billiards::graphics {
 		virtual ~GraphicsReceiver() = default;
 
 		virtual void fill(const Circle *graphics) const = 0;
-		virtual void fill(const Lines *graphics) const = 0;
 		virtual void fill(const Polygon *graphics) const = 0;
+//		virtual void fill(const Lines *graphics) const = 0;
 
 		virtual void draw(const Circle *graphics) const = 0;
-		virtual void draw(const Lines *graphics) const = 0;
 		virtual void draw(const Polygon *graphics) const = 0;
+		virtual void draw(const Lines *graphics) const = 0;
 
 		virtual void draw(const Text *graphics) const = 0;
 		virtual void draw(const Image *graphics) const = 0;
@@ -37,15 +37,10 @@ namespace billiards::graphics {
 				draw((const Text *) ptr);
 			} else if (type == "image") {
 				draw((const Image *) ptr);
+			} else if (type == "lines") {
+				draw((const Lines *) ptr);
 			} else if (type == "circle") {
 				const auto *s = (const Circle *) ptr;
-				if (s->fill) {
-					fill(s);
-				} else {
-					draw(s);
-				}
-			} else if (type == "lines") {
-				const auto *s = (const Lines *) ptr;
 				if (s->fill) {
 					fill(s);
 				} else {

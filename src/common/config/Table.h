@@ -9,17 +9,37 @@
 #include "./Pocket.h"
 #include "./Rail.h"
 #include "common/geometry/Dimensions.h"
+#include "common/geometry/geometry.h"
+
+#define POCKET_DEF(X, Y, THETA) Pocket{ \
+	geometry::Point{X + 3.0 * std::cos(THETA + M_PI / 4), Y + 3.0 * std::sin(THETA + M_PI / 4)},	\
+	geometry::Point{X + 0.5 * std::cos(THETA + M_PI / 4), Y + 0.5 * std::sin(THETA + M_PI / 4)},	\
+	geometry::Point{X + 3.0 * std::cos(THETA - M_PI / 4), Y + 3.0 * std::sin(THETA - M_PI / 4)}}
+
 
 namespace billiards::config {
+
+	namespace constants {
+		constexpr int NUM_RAILS = 6;
+
+		constexpr int RIGHT_LOWER_POCKET = 0;
+		constexpr int MIDDLE_LOWER_POCKET = 1;
+		constexpr int LEFT_LOWER_POCKET = 2;
+		constexpr int RIGHT_UPPER_POCKET = 3;
+		constexpr int MIDDLE_UPPER_POCKET = 4;
+		constexpr int LEFT_UPPER_POCKET = 5;
+	}
+
 	class Table : public json::Serializable {
 	public:
+
+
 		std::array<BallInfo, 16> balls;
 		std::array<Pocket, 6> pockets;
-		std::array<Rail, 6> rails;
 		geometry::Dimensions dims;
 
-		Table() :
-			balls{
+		Table()
+			: balls{
 			BallInfo{   ball_type::CUE, 2.26 / 2, graphics::color::from_int(255, 255, 255),  0, "cue"},
 			BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(255, 245,  64),  1, "one"},
 			BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int( 43,  59, 179),  2, "two"},
@@ -36,40 +56,73 @@ namespace billiards::config {
 			BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(255, 159,  41), 13, "thirteen"},
 			BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(  9, 148,  30), 14, "fourteen"},
 			BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(255,  25,  98), 15, "fifteen"},
-			},
-			pockets{
-				Pocket{
-					geometry::Point{90.26352087,  2.86666667},
-					geometry::Point{92.03339383,  1.66666667},
-					geometry::Point{93.60290381,  5.83333333}},
-				Pocket{
-					geometry::Point{50.72522686,  3.06666667},
-					geometry::Point{50.0907441 ,  1.66666667},
-					geometry::Point{44.81451906,  3.03333333}},
-				Pocket{
-					geometry::Point{ 5.24283122,  2.93333333},
-					geometry::Point{ 3.20580762,  1.66666667},
-					geometry::Point{ 1.66969147,  5.93333333}},
-				Pocket{
-					geometry::Point{ 5.40980036, 46.86666667},
-					geometry::Point{ 4.40798548, 47.66666667},
-					geometry::Point{ 1.66969147, 43.66666667}},
-				Pocket{
-					geometry::Point{45.08166969, 46.96666667},
-					geometry::Point{45.18185118, 47.66666667},
-					geometry::Point{50.69183303, 46.93333333}},
-				Pocket{
-					geometry::Point{90.16333938, 46.73333333},
-					geometry::Point{91.76624319, 47.66666667},
-					geometry::Point{93.66969147, 43.33333333}}
-			},
-			rails{},
-			dims{92, 46}
+			}
+			, pockets{
+				POCKET_DEF(92, 0, 0.75 * M_PI),
+				POCKET_DEF(51, -2, 0.5 * M_PI),
+				POCKET_DEF(0, 0, 0.25 * M_PI),
+				POCKET_DEF(0, 46, -0.25 * M_PI),
+				POCKET_DEF(51, 48, -0.5 * M_PI),
+				POCKET_DEF(92, 46, -0.75 * M_PI)
+			}
+			, dims{92, 46}
 		{
-
+			pockets[constants::RIGHT_LOWER_POCKET].orientation = PocketOrientation{horz_loc::RIGHT, vert_loc::LOWER};
+			pockets[constants::MIDDLE_LOWER_POCKET].orientation = PocketOrientation{horz_loc::MIDDLE, vert_loc::LOWER};
+			pockets[constants::LEFT_LOWER_POCKET].orientation = PocketOrientation{horz_loc::LEFT, vert_loc::LOWER};
+			pockets[constants::RIGHT_UPPER_POCKET].orientation = PocketOrientation{horz_loc::LEFT, vert_loc::UPPER};
+			pockets[constants::MIDDLE_UPPER_POCKET].orientation = PocketOrientation{horz_loc::MIDDLE, vert_loc::UPPER};
+			pockets[constants::LEFT_UPPER_POCKET].orientation = PocketOrientation{horz_loc::RIGHT, vert_loc::UPPER};
 		}
 
 		virtual ~Table() = default;
+
+		[[nodiscard]] inline
+		Rail rail(const int p1, const int p2) const {
+			const int pocket1 = std::min(p1, p2);
+			const int pocket2 = std::max(p1, p2);
+			if (pocket1 == pocket2) {
+				throw std::runtime_error{"No rail between the same pocket..."};
+			}
+			const geometry::Point rail_center = (pockets[pocket1].outerSegment1 + pockets[pocket2].outerSegment2) / 2.0;
+			const double d11 = (pockets[pocket1].outerSegment1 - rail_center).norm2();
+			const double d12 = (pockets[pocket1].outerSegment2 - rail_center).norm2();
+			const double d21 = (pockets[pocket2].outerSegment1 - rail_center).norm2();
+			const double d22 = (pockets[pocket2].outerSegment2 - rail_center).norm2();
+			const geometry::Point inner1 = d11 <= d12 ? pockets[pocket1].outerSegment1 : pockets[pocket1].outerSegment2;
+			const geometry::Point inner2 = d21 <= d22 ? pockets[pocket2].outerSegment1 : pockets[pocket2].outerSegment2;
+			const geometry::MaybeLine rail_line = geometry::through(inner1, inner2);
+			const geometry::MaybePoint table_center = geometry::MaybePoint{dims.width / 2, dims.height / 2};
+			const geometry::MaybeLine orthogonal = geometry::orthogonal_at(rail_line, table_center);
+			const geometry::MaybePoint inter = geometry::intersection(rail_line, orthogonal);
+			const geometry::Point direction = (table_center - inter).get();
+			const double norm = direction.norm();
+			if (norm < TOLERANCE) {
+				throw std::runtime_error{"zero length direction"};
+			}
+			return Rail(inner1, inner2, direction / norm);
+		}
+
+		[[nodiscard]] inline
+		Rail rail(int rail_index) const {
+			switch (rail_index) {
+				case 0: return rail(constants::RIGHT_LOWER_POCKET, constants::RIGHT_UPPER_POCKET);
+				case 1: return rail(constants::RIGHT_UPPER_POCKET, constants::MIDDLE_UPPER_POCKET);
+				case 2: return rail(constants::MIDDLE_UPPER_POCKET, constants::LEFT_UPPER_POCKET);
+				case 3: return rail(constants::LEFT_UPPER_POCKET, constants::LEFT_LOWER_POCKET);
+				case 4: return rail(constants::LEFT_LOWER_POCKET, constants::MIDDLE_LOWER_POCKET);
+				case 5: return rail(constants::MIDDLE_LOWER_POCKET, constants::RIGHT_LOWER_POCKET);
+				default:
+					throw std::runtime_error{"Invalid rail index"};
+			}
+		}
+
+		const Pocket& get_pocket(int pocket_index) const {
+			if (pocket_index < 0 || pocket_index >= pockets.size()) {
+				throw std::runtime_error{"Invalid pocket"};
+			}
+			return pockets[pocket_index];
+		}
 
 		void to_json(json::SaxWriter& writer) const {
 			writer.begin_object();
@@ -111,4 +164,35 @@ namespace billiards::config {
 		};
 	};
 }
+
+
+
+/*
+ *
+ * Attempt:
+				Pocket{
+					geometry::Point{90.26352087,  2.86666667},
+					geometry::Point{92.03339383,  1.66666667},
+					geometry::Point{93.60290381,  5.83333333}},
+				Pocket{
+					geometry::Point{50.72522686,  3.06666667},
+					geometry::Point{50.0907441 ,  1.66666667},
+					geometry::Point{44.81451906,  3.03333333}},
+				Pocket{
+					geometry::Point{ 5.24283122,  2.93333333},
+					geometry::Point{ 3.20580762,  1.66666667},
+					geometry::Point{ 1.66969147,  5.93333333}},
+				Pocket{
+					geometry::Point{ 5.40980036, 46.86666667},
+					geometry::Point{ 4.40798548, 47.66666667},
+					geometry::Point{ 1.66969147, 43.66666667}},
+				Pocket{
+					geometry::Point{45.08166969, 46.96666667},
+					geometry::Point{45.18185118, 47.66666667},
+					geometry::Point{50.69183303, 46.93333333}},
+				Pocket{
+					geometry::Point{90.16333938, 46.73333333},
+					geometry::Point{91.76624319, 47.66666667},
+					geometry::Point{93.66969147, 43.33333333}
+ */
 #endif //IDEA_TABLE_H
