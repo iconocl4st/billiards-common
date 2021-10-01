@@ -20,7 +20,7 @@ namespace billiards::geometry {
 
 		~Line() = default;
 
-		inline
+		[[nodiscard]] inline
 		std::optional<Line> normalize() const {
 			double n = std::sqrt(a * a + b * b);
 			if (n < TOLERANCE) {

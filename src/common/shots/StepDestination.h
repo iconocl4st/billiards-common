@@ -22,15 +22,13 @@ namespace billiards::shots {
 			Destination(int step_index) : step_index{step_index}, target{nullptr} {}
 			virtual ~Destination() = default;
 
-			void parse(const nlohmann::json& value) override {
-				if (!value.contains("target") || !value["target"].is_object()) {
-					throw std::runtime_error{"Destination must have a target"};
+			void parse(const nlohmann::json& value, json::ParseResult& status) override {
+				ENSURE_OBJECT(status, value, "target", "Destination must have a target");
+				target = targets::parse(value["target"], status);
+				if (!status.success) {
+					return;
 				}
-				target = targets::parse(value["target"]);
-
-				if (!value.contains("step-index") || !value["step-index"].is_number()) {
-					throw std::runtime_error{"Destination must have a step index"};
-				}
+				ENSURE_NUMBER(status, value, "step-index", "Destination must have a step index");
 				step_index = value["step-index"].get<int>();
 			}
 

@@ -99,13 +99,12 @@ namespace billiards::layout::vball {
 		}
 
 		inline
-		void parse(const nlohmann::json& value) override {
-			type = virtual_type::UNKNOWN;
-			if (value.contains("type") && value["type"].is_string()) {
-				type = virtual_type::from_string(value["type"].get<std::string>());
-			}
-			if (type == virtual_type::NUMBER && value.contains("number") && value["number"].is_number())
+		void parse(const nlohmann::json& value, json::ParseResult& result) override {
+			ENSURE_STRING(result, value, "type", "Virtual ball must have a type");
+			type = virtual_type::from_string(value["type"].get<std::string>());
+			if (type == virtual_type::NUMBER && HAS_NUMBER(value, "number")) {
 				number = value["number"].get<int>();
+			}
 		}
 	};
 };

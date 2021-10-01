@@ -27,13 +27,11 @@ namespace billiards::geometry {
 			writer.end_object();
 		}
 		
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("width") && value["width"].is_number()) {
-				width = value["width"].get<double>();
-			}
-			if (value.contains("height") && value["height"].is_number()) {
-				height = value["height"].get<double>();
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_NUMBER(status, value, "width", "Dimensions must have a width");
+			width = value["width"].get<double>();
+			ENSURE_NUMBER(status, value, "width", "Dimensions must have a height");
+			height = value["height"].get<double>();
 		}
 	};
 

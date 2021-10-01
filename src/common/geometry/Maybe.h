@@ -124,6 +124,7 @@ namespace billiards::geometry {
 			UNKNOWN,
 		};
 	}
+
 	class MaybeSignum {
 	public:
 		sgn::sgn v;
@@ -328,11 +329,11 @@ namespace billiards::geometry {
 
 		~MaybePoint() = default;
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("x") && value["x"].is_number()) {
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			if (HAS_NUMBER(value, "x")) {
 				x = value["x"].get<double>();
 			}
-			if (value.contains("y") && value["y"].is_number()) {
+			if (HAS_NUMBER(value, "y")) {
 				y = value["y"].get<double>();
 			}
 		}

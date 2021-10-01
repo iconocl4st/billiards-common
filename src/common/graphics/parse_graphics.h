@@ -11,7 +11,7 @@
 
 namespace billiards::graphics {
 	inline
-	std::shared_ptr<graphics::GraphicsPrimitive> parse_graphics(const nlohmann::json& value) {
+	std::shared_ptr<graphics::GraphicsPrimitive> parse_graphics(const nlohmann::json& value, json::ParseResult& result) {
 		GraphicsPrimitive *primitive = nullptr;
 		if (!value.contains("type") || !value["type"].is_string()) {
 			return std::shared_ptr<GraphicsPrimitive>{primitive};
@@ -28,7 +28,7 @@ namespace billiards::graphics {
 			return std::shared_ptr<GraphicsPrimitive>{primitive};
 		}
 
-		primitive->parse(value);
+		primitive->parse(value, result);
 
 		return std::shared_ptr<GraphicsPrimitive>{primitive};
 	}

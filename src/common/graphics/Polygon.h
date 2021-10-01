@@ -35,15 +35,14 @@ namespace billiards::graphics {
 			writer.end_object();
 		}
 
-		void parse(const nlohmann::json& value) override {
+		void parse(const nlohmann::json& value, json::ParseResult& result) override {
+			ENSURE_ARRAY(result, value, "vertices", "Polygons must have vertices");
 			vertices.clear();
-			if (value.contains("vertices") && value["vertices"].is_array()) {
 				for (const auto& obj : value["vertices"]) {
 					vertices.emplace_back();
-					vertices.back().parse(obj);
+					PARSE_CHILD(result, obj, vertices.back());
 				}
-			}
-			ShapeGraphics::parse(value);
+			ShapeGraphics::parse(value, result);
 		}
 
 		[[nodiscard]] std::string get_type() const override { return "polygon"; }

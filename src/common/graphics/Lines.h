@@ -32,27 +32,20 @@ namespace billiards::graphics {
 			segments.emplace_back(std::pair{p1, p2});
 		}
 
-		void parse(const nlohmann::json& value) override {
-			ShapeGraphics::parse(value);
-
-			if (!value.contains("segments") || !value["segments"].is_array()) {
-				throw std::runtime_error{"lines must have segments"};
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& result) override {
+			ENSURE_ARRAY(result, value, "segments", "lines must have segments");
 
 			segments.clear();
 			for (const auto& segment: value["segments"]) {
+				ENSURE_OBJECT(result, segment, "begin", "segments must have a begin");
 				geometry::Point begin;
+				PARSE_CHILD(result, value["begin"], begin);
+				ENSURE_OBJECT(result, segment, "end", "segments must have an end");
 				geometry::Point end;
-				if (!segment.contains("begin") || !segment["begin"].is_object()) {
-					throw std::runtime_error{"segments must have a begin"};
-				}
-				begin.parse(segment["begin"]);
-				if (!segment.contains("end") || !segment["end"].is_object()) {
-					throw std::runtime_error{"segments must have an end"};
-				}
-				end.parse(segment["end"]);
+				PARSE_CHILD(result, value["end"], end);
 				segments.emplace_back(std::pair{begin, end});
 			}
+			ShapeGraphics::parse(value, result);
 		}
 
 		void to_json(json::SaxWriter& writer) const override {

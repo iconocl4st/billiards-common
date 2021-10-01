@@ -90,12 +90,9 @@ namespace billiards::shots {
 			writer.field("pocket", pocket);
 		}
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("pocket") && value["pocket"].is_number()) {
-				pocket = value["pocket"].get<int>();
-			} else {
-				pocket = -1;
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_NUMBER(status, value, "pocket", "must have a pocket");
+			pocket = value["pocket"].get<int>();
 		}
 	};
 
@@ -115,12 +112,9 @@ namespace billiards::shots {
 			writer.field("kissed-ball", kissed_ball);
 		}
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("kissed-ball") && value["kissed-ball"].is_number()) {
-				kissed_ball = value["kissed-ball"].get<int>();
-			} else {
-				kissed_ball = -1;
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_NUMBER(status, value, "kissed-ball", "must have a kissed ball");
+			kissed_ball = value["kissed-ball"].get<int>();
 		}
 	};
 
@@ -140,12 +134,9 @@ namespace billiards::shots {
 			writer.field("cue-ball", cue_ball);
 		}
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("cue-ball") && value["cue-ball"].is_number()) {
-				cue_ball = value["cue-ball"].get<int>();
-			} else {
-				cue_ball = -1;
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_NUMBER(status, value, "cue-ball", "must have a cue ball");
+			cue_ball = value["cue-ball"].get<int>();
 		}
 	};
 
@@ -165,12 +156,9 @@ namespace billiards::shots {
 			writer.field("object-ball", object_ball);
 		}
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("object-ball") && value["object-ball"].is_number()) {
-				object_ball = value["object-ball"].get<int>();
-			} else {
-				object_ball = -1;
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_NUMBER(status, value, "object-ball", "must have an object ball");
+			object_ball = value["object-ball"].get<int>();
 		}
 	};
 
@@ -190,16 +178,14 @@ namespace billiards::shots {
 			writer.field("rail", rail);
 		}
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("rail") && value["rail"].is_number()) {
-				rail = value["rail"].get<int>();
-			} else {
-				rail = -1;
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_NUMBER(status, value, "rail", "must have a rail");
+			rail = value["rail"].get<int>();
 		}
 	};
 
 	namespace step {
+		[[nodiscard]] inline
 		ShotStep *from_type(step_type::ShotStepType type) {
 			switch (type) {
 				case step_type::CUE:
@@ -218,15 +204,18 @@ namespace billiards::shots {
 			}
 		}
 
-		std::shared_ptr<ShotStep> parse(const nlohmann::json& value) {
-			if (!value.contains("type") || !value["type"].is_string()) {
+		[[nodiscard]] inline
+		std::shared_ptr<ShotStep> parse(const nlohmann::json& value, json::ParseResult& status) {
+			if (!HAS_STRING(value, "type")) {
+				status.success = false;
+				status.error_msg << "the shot step must have a type";
 				return nullptr;
 			}
 
 			step_type::ShotStepType type = step_type::from_string(value["type"].get<std::string>());
 			ShotStep *ret = from_type(type);
 			if (ret != nullptr) {
-				ret->parse(value);
+				ret->parse(value, status);
 			}
 			return std::shared_ptr<ShotStep>{ret};
 		}

@@ -92,13 +92,13 @@ namespace billiards::config {
 			if (pocket1 == pocket2) {
 				throw std::runtime_error{"No rail between the same pocket..."};
 			}
-			const geometry::Point rail_center = (pockets[pocket1].outerSegment1 + pockets[pocket2].outerSegment2) / 2.0;
-			const double d11 = (pockets[pocket1].outerSegment1 - rail_center).norm2();
-			const double d12 = (pockets[pocket1].outerSegment2 - rail_center).norm2();
-			const double d21 = (pockets[pocket2].outerSegment1 - rail_center).norm2();
-			const double d22 = (pockets[pocket2].outerSegment2 - rail_center).norm2();
-			const geometry::Point inner1 = d11 <= d12 ? pockets[pocket1].outerSegment1 : pockets[pocket1].outerSegment2;
-			const geometry::Point inner2 = d21 <= d22 ? pockets[pocket2].outerSegment1 : pockets[pocket2].outerSegment2;
+			const geometry::Point rail_center = (pockets[pocket1].outer_segment_1 + pockets[pocket2].outer_segment_2) / 2.0;
+			const double d11 = (pockets[pocket1].outer_segment_1 - rail_center).norm2();
+			const double d12 = (pockets[pocket1].outer_segment_2 - rail_center).norm2();
+			const double d21 = (pockets[pocket2].outer_segment_1 - rail_center).norm2();
+			const double d22 = (pockets[pocket2].outer_segment_2 - rail_center).norm2();
+			const geometry::Point inner1 = d11 <= d12 ? pockets[pocket1].outer_segment_1 : pockets[pocket1].outer_segment_2;
+			const geometry::Point inner2 = d21 <= d22 ? pockets[pocket2].outer_segment_1 : pockets[pocket2].outer_segment_2;
 			const geometry::MaybeLine rail_line = geometry::through(inner1, inner2);
 			const geometry::MaybePoint table_center = geometry::MaybePoint{dims.width / 2, dims.height / 2};
 			const geometry::MaybeLine orthogonal = geometry::orthogonal_at(rail_line, table_center);
@@ -178,24 +178,27 @@ namespace billiards::config {
 			writer.end_object();
 		};
 
-		void parse(const nlohmann::json& value) {
-			if (value.contains("balls") && value["balls"].is_array()
-					&& value["balls"].size() == balls.size()) {
-				auto length = balls.size();
-				for (int i=0; i<length; i++) {
-					balls[i].parse(value["balls"][i]);
+		void parse(const nlohmann::json& value, json::ParseResult& status) {
+			ENSURE_ARRAY(status, value, "balls", "table must have balls");
+			// value["balls"].size() == balls.size()
+			auto num_balls = balls.size();
+			for (int i = 0; i < num_balls; i++) {
+				balls[i].parse(value["balls"][i], status);
+				if (!status.success) {
+					return;
 				}
 			}
-			if (value.contains("pockets") && value["pockets"].is_array()
-					&& value["pockets"].size() == pockets.size()) {
-				auto length = pockets.size();
-				for (int i=0; i<length; i++) {
-					pockets[i].parse(value["pockets"][i]);
+			ENSURE_ARRAY(status, value, "pockets", "table must have pockets");
+//			value["pockets"].size() == pockets.size()
+			auto num_pockets = pockets.size();
+			for (int i = 0; i < num_pockets; i++) {
+				pockets[i].parse(value["pockets"][i], status);
+				if (!status.success) {
+					return;
 				}
 			}
-			if (value.contains("dimensions") && value["dimensions"].is_object()) {
-				dims.parse(value["dimensions"]);
-			}
+
+			REQUIRE_CHILD(status, value, "dimensions", dims, "Table must have dimensions");
 		};
 	};
 }

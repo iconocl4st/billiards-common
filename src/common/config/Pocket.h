@@ -65,6 +65,7 @@ namespace billiards::config {
 		PocketOrientation() : PocketOrientation{horz_loc::UNKNOWN, vert_loc::UNKNOWN} {}
 		~PocketOrientation() = default;
 
+		[[nodiscard]] inline
 		std::string to_string() const {
 			std::stringstream ss{};
 			ss << horz_loc::to_string(horizontal) << " " << vert_loc::to_string(vertical);
@@ -74,56 +75,50 @@ namespace billiards::config {
 
 	class Pocket : public json::Serializable {
 	public:
-		geometry::Point outerSegment1;
-		geometry::Point outerSegment2;
-		geometry::Point innerSegment1;
-		geometry::Point holeCenter;
+		geometry::Point inner_segment_1;
+		geometry::Point outer_segment_1;
+		geometry::Point outer_segment_2;
+		geometry::Point hole_center;
 
 		PocketOrientation orientation;
 
 		Pocket() = default;
-		Pocket(geometry::Point outerSegment1, geometry::Point innerSegment1, geometry::Point outerSegment2)
-			: outerSegment1{outerSegment1}
-			, outerSegment2{outerSegment2}
-			, innerSegment1{innerSegment1}
-			, holeCenter{}
+		Pocket(geometry::Point outer_segment_1, geometry::Point inner_segment_1, geometry::Point outer_segment_2)
+			: inner_segment_1{inner_segment_1}
+			, outer_segment_1{outer_segment_1}
+			, outer_segment_2{outer_segment_2}
+			, hole_center{}
 			, orientation{}
 		{}
 		~Pocket() = default;
 
 		[[nodiscard]] geometry::Point center() const {
 			// TODO: remove this method...
-			return (outerSegment1 + outerSegment2 + innerSegment1 + innerSegment2().point()) / 4.0;
+			return (outer_segment_1 + inner_segment_1 + outer_segment_2 + inner_segment_2().point()) / 4.0;
 		}
 
 		[[nodiscard]] inline
-		geometry::MaybePoint innerSegment2() const {
-			auto segment = geometry::through(outerSegment1, outerSegment2);
-			auto normal = geometry::orthogonal_at(segment, (outerSegment1 + outerSegment2) / 2);
-			return geometry::reflect(innerSegment1, normal);
+		geometry::MaybePoint inner_segment_2() const {
+			auto segment = geometry::through(outer_segment_1, outer_segment_2);
+			auto normal = geometry::orthogonal_at(segment, (outer_segment_1 + outer_segment_2) / 2);
+			return geometry::reflect(inner_segment_1, normal);
 		}
 
 		void to_json(json::SaxWriter& writer) const {
 			writer.begin_object();
 			writer.key("outer-segment-1");
-			outerSegment1.to_json(writer);
+			outer_segment_1.to_json(writer);
 			writer.key("outer-segment-2");
-			outerSegment2.to_json(writer);
+			outer_segment_2.to_json(writer);
 			writer.key("inner-segment-1");
-			innerSegment1.to_json(writer);
+			inner_segment_1.to_json(writer);
 			writer.end_object();
 		};
 
-		void parse(const nlohmann::json& value) {
-			if (value.contains("outer-segment-1") && value["outer-segment-1"].is_object()) {
-				outerSegment1.parse(value["outer-segment-1"]);
-			}
-			if (value.contains("outer-segment-2") && value["outer-segment-2"].is_object()) {
-				outerSegment2.parse(value["outer-segment-2"]);
-			}
-			if (value.contains("inner-segment-1") && value["inner-segment-1"].is_object()) {
-				innerSegment1.parse(value["inner-segment-1"]);
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) {
+			REQUIRE_CHILD(status, value, "inner-segment-1", inner_segment_1, "Missing an outer segment");
+			REQUIRE_CHILD(status, value, "outer-segment-1", outer_segment_1, "Missing an outer segment");
+			REQUIRE_CHILD(status, value, "outer-segment-2", outer_segment_2, "Missing an outer segment");
 		};
 	};
 }

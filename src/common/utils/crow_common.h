@@ -68,7 +68,7 @@ namespace billiards::utils {
 			writer.end_object();
 		}
 		
-		void parse(const nlohmann::json& value) override {
+		void parse(const nlohmann::json& value, json::ParseResult& result) override {
 			// This should not need to be called...
 		}
 	};

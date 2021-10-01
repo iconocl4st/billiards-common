@@ -22,16 +22,16 @@ namespace billiards::graphics {
 
 		~ShapeGraphics() override = default;
 
-		void parse(const nlohmann::json& value) override {
-			if (!value.contains("color") || !value["color"].is_object()) {
-				throw std::runtime_error{"shapes must have a color"};
-			}
-			color.parse(value["color"]);
+		void parse(const nlohmann::json& value, json::ParseResult& result) override {
+			ENSURE_OBJECT(result, value, "color", "shapes must have a color");
+			PARSE_CHILD(result, value["color"], color);
 
-			bool has_fill = value.contains("fill") && value["fill"].is_boolean();
-			bool has_width = value.contains("line-width") && value["line-width"].is_number();
+			const bool has_fill = HAS_BOOL(value, "fill");
+			const bool has_width = HAS_BOOL(value, "line-width");
 			if (!has_fill && !has_width) {
-				throw std::runtime_error{"shapes must either have a fill or a line width"};
+				result.success = false;
+				result.error_msg << "shapes must either have a fill or a line width";
+				return;
 			}
 			if (has_fill) {
 				fill = value["fill"].get<bool>();

@@ -37,13 +37,11 @@ namespace billiards::layout {
 		}
 
 		inline
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("ball") && value["ball"].is_object()) {
-				ball.parse(value["ball"]);
-			}
-			if (value.contains("location") && value["location"].is_object()) {
-				location.parse(value["location"]);
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_OBJECT(status, value, "ball", "must have a ball");
+			PARSE_CHILD(status, value["ball"], ball);
+			ENSURE_OBJECT(status, value, "location", "must have a location");
+			PARSE_CHILD(status, value["location"], location);
 		}
 	};
 }

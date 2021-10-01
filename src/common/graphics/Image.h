@@ -31,22 +31,13 @@ namespace billiards::graphics {
 
 		[[nodiscard]] std::string get_type() const override { return "image"; };
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("path") && value["path"].is_string()) {
-				path = value["path"].get<std::string>();
-			}
-			if (value.contains("lower-right") && value["lower-right"].is_object()) {
-				lr.parse(value["lower-right"]);
-			}
-			if (value.contains("upper-right") && value["upper-right"].is_object()) {
-				ur.parse(value["upper-right"]);
-			}
-			if (value.contains("upper-left") && value["upper-left"].is_object()) {
-				ul.parse(value["upper-left"]);
-			}
-			if (value.contains("lower-left") && value["lower-left"].is_object()) {
-				ll.parse(value["lower-left"]);
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_STRING(status, value, "path", "Images must have a path");
+			path = value["path"].get<std::string>();
+			REQUIRE_CHILD(status, value, "lower-right", lr, "Missing image bounds");
+			REQUIRE_CHILD(status, value, "upper-right", ur, "Missing image bounds");
+			REQUIRE_CHILD(status, value, "upper-left", ul, "Missing image bounds");
+			REQUIRE_CHILD(status, value, "lower-left", ll, "Missing image bounds");
 		}
 
 		void to_json(json::SaxWriter& writer) const override {

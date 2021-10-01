@@ -42,18 +42,16 @@ namespace billiards::graphics {
 //		Color(double red, double green, double blue) : Color{red, green, blue, 1} {}
 
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("r") && value["r"].is_number()) {
-				red = value["r"].get<double>();
-			}
-			if (value.contains("g") && value["g"].is_number()) {
-				green = value["g"].get<double>();
-			}
-			if (value.contains("b") && value["b"].is_number()) {
-				blue = value["b"].get<double>();
-			}
-			if (value.contains("a") && value["a"].is_number()) {
-				alpha = value["a"].get<double>();
+		void parse(const nlohmann::json& value, json::ParseResult& result) override {
+			ENSURE_NUMBER(result, value, "r", "Color must have red");
+			red = value["r"].get<int>();
+			ENSURE_NUMBER(result, value, "g", "Color must have green");
+			green = value["g"].get<int>();
+			ENSURE_NUMBER(result, value, "b", "Color must have blue");
+			blue = value["b"].get<int>();
+
+			if (HAS_NUMBER(value, "a")) {
+				alpha = value["a"].get<int>();
 			}
 		}
 

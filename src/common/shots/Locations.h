@@ -54,19 +54,14 @@ namespace billiards::layout {
 		}
 
 		inline
-		void parse(const nlohmann::json& value) override {
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_ARRAY(status, value, "balls", "Locations must have balls");
 			balls.clear();
-
-			if (value.contains("balls") && value["balls"].is_array()) {
-				for (const auto& it : value["balls"]) {
-					balls.emplace_back(LocatedBall{});
-					balls.back().parse(it);
-				}
+			for (const auto& it: value["balls"]) {
+				balls.emplace_back(LocatedBall{});
+				PARSE_CHILD(status, it, balls.back());
 			}
-
-			if (value.contains("table-dimensions") && value["table-dimensions"].is_object()) {
-				table_dims.parse(value["table-dimensions"]);
-			}
+			REQUIRE_CHILD(status, value, "table-dimensions", table_dims, "Locations are specific to dimensions");
 		}
 	};
 

@@ -22,7 +22,7 @@ namespace billiards::graphics {
 		double font_size;
 
 		Text()
-			: color{1, 1, 1, 1}
+			: color{255, 255, 255, 255}
 			, text{}
 			, font_family{"DejaVu Sans Mono"}
 			, font_size{16}
@@ -33,22 +33,20 @@ namespace billiards::graphics {
 
 		[[nodiscard]] std::string get_type() const override { return "text"; };
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("color") && value["color"].is_object()) {
-				color.parse(value["color"]);
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			if (HAS_OBJECT(value, "color")) {
+				PARSE_CHILD(status, value["color"], color);
 			}
-			if (value.contains("location") && value["location"].is_object()) {
-				location.parse(value["location"]);
-			}
-			if (value.contains("text") && value["text"].is_string()) {
+			if (HAS_STRING(value, "text")) {
 				text = value["text"].get<std::string>();
 			}
-			if (value.contains("font-family") && value["font-family"].is_string()) {
+			if (HAS_STRING(value, "font-family")) {
 				font_family = value["font-family"].get<std::string>();
 			}
-			if (value.contains("font-size") && value.is_number()) {
+			if (HAS_NUMBER(value, "font-size")) {
 				font_size = value["font-size"].get<double>();
 			}
+			REQUIRE_CHILD(status, value, "location", location, "Text must be located");
 		}
 
 		void to_json(json::SaxWriter& writer) const override {

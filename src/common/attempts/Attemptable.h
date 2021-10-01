@@ -18,6 +18,7 @@ namespace billiards::attempts {
 		Attemptable() = default;
 		virtual ~Attemptable() = default;
 
+		[[nodiscard]] inline
 		int compare(const Attemptable& other) const {
 			int lcmp = layout.compare(other.layout);
 			if (lcmp != 0) {

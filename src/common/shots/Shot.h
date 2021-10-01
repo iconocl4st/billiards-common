@@ -37,12 +37,15 @@ namespace billiards::shots {
 			writer.end_object();
 		}
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("steps") && value["steps"].is_array()) {
-				steps.clear();
-				for (const auto& it : value["steps"]) {
-					steps.emplace_back(step::parse(it));
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_ARRAY(status, value, "steps", "Shot must have steps");
+			steps.clear();
+			for (const auto& it: value["steps"]) {
+				auto step = step::parse(it, status);
+				if (!status.success) {
+					return;
 				}
+				steps.push_back(step);
 			}
 		}
 	};

@@ -19,6 +19,7 @@ namespace billiards::config {
 			UNKNOWN,
 		};
 
+		[[nodiscard]] inline
 		std::string to_string(BallType type) {
 			switch (type) {
 				case SOLID:
@@ -33,6 +34,7 @@ namespace billiards::config {
 			}
 		}
 
+		[[nodiscard]] inline
 		BallType from_string(const std::string& str) {
 			if (str == "solid") {
 				return SOLID;
@@ -66,6 +68,7 @@ namespace billiards::config {
 
 		~BallInfo() = default;
 
+		[[nodiscard]] inline
 		bool is_cue() const { return ball_type == ball_type::CUE; }
 
 		bool operator==(const BallInfo& other) const {
@@ -83,24 +86,17 @@ namespace billiards::config {
 			writer.end_object();
 		}
 		
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("radius") && value["radius"].is_number()) {
-				radius = value["radius"].get<double>();
-			}
-			if (value.contains("number") && value["number"].is_number()) {
-				number = value["number"].get<int>();
-			}
-			if (value.contains("color") && value["color"].is_object()) {
-				color.parse(value["color"]);
-			}
-			if (value.contains("name") && value["name"].is_string()) {
-				name = value["name"].get<std::string>();
-			}
-			if (value.contains("ball-type") && value["ball-type"].is_string()) {
-				ball_type = ball_type::from_string(value["ball-type"].get<std::string>());
-			}
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_NUMBER(status, value, "radius", "Ball info must have a radius");
+			radius = value["radius"].get<double>();
+			ENSURE_NUMBER(status, value, "number", "Ball info must have a number");
+			number = value["number"].get<int>();
+			ENSURE_STRING(status, value, "name", "Ball info must have a name");
+			name = value["name"].get<std::string>();
+			ENSURE_STRING(status, value, "type", "Ball info must have a type");
+			ball_type = ball_type::from_string(value["ball-type"].get<std::string>());
+			REQUIRE_CHILD(status, value, "color", color, "Ball info must have a color");
 		}
-
 	};
 
 	namespace balls {

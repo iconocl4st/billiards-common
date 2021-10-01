@@ -21,23 +21,6 @@ namespace billiards::shots {
 		CueingInfo() = default;
 		~CueingInfo() override = default;
 
-		void parse(const nlohmann::json& value) override {
-			if (value.contains("lower-cut-angle") && value["lower-cut-angle"].is_number()) {
-				lower_cut_angle = value["lower-cut-angle"].get<double>();
-			}
-			if (value.contains("upper-cut-angle") && value["upper-cut-angle"].is_number()) {
-				upper_cut_angle = value["upper-cut-angle"].get<double>();
-			}
-			if (!value.contains("precision") || !value["precision"].is_number()) {
-				throw std::runtime_error{"Cueing info must have a precision"};
-			}
-			precision = value["precision"].get<double>();
-			if (!value.contains("cue-location") || !value["cue-location"].is_object()) {
-				throw std::runtime_error{"Cueing info must have a cue location"};
-			}
-			cue_location.parse(value["cue-location"]);
-		}
-
 		void to_json(billiards::json::SaxWriter& writer) const override {
 			writer.begin_object();
 			if (lower_cut_angle.is_valid()) {
@@ -51,6 +34,18 @@ namespace billiards::shots {
 			writer.key("cue-location");
 			cue_location.to_json(writer);
 			writer.end_object();
+		}
+
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			if (HAS_NUMBER(value, "lower-cut-angle")) {
+				lower_cut_angle = value["lower-cut-angle"].get<double>();
+			}
+			if (HAS_NUMBER(value, "upper-cut-angle")) {
+				upper_cut_angle = value["upper-cut-angle"].get<double>();
+			}
+			ENSURE_NUMBER(status, value, "precision", "Cueing info must have a precision");
+			precision = value["precision"].get<double>();
+			REQUIRE_CHILD(status, value, "cue-location", cue_location, "Cueing info must have a cue location");
 		}
 	};
 }

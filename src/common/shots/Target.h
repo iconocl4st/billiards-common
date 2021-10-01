@@ -9,10 +9,11 @@ namespace billiards::shots {
 	namespace target_type {
 		enum TargetType {
 			GOAL_POST,
-			// More coming soon...
+			// More coming soon?
 			UNKNOWN,
 		};
 
+		[[nodiscard]] inline
 		std::string to_string(const TargetType type) {
 			switch (type) {
 				case GOAL_POST:
@@ -23,6 +24,7 @@ namespace billiards::shots {
 			}
 		}
 
+		[[nodiscard]] inline
 		TargetType from_string(const std::string& str) {
 			if (str == "goal-posts") {
 				return GOAL_POST;
@@ -36,8 +38,7 @@ namespace billiards::shots {
 	public:
 		target_type::TargetType type;
 
-		Target(target_type::TargetType type)
-			: type{type} {}
+		Target(target_type::TargetType type) : type{type} {}
 
 		virtual ~Target() = default;
 	};
@@ -63,26 +64,16 @@ namespace billiards::shots {
 			};
 		}
 
-		void parse(const nlohmann::json& value) override {
-			if (!value.contains("type")
-				|| !value["type"].is_string()
-				|| type != target_type::from_string(value["type"].get<std::string>())) {
-				throw std::runtime_error{"Trying to parse the wrong type of target"};
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_STRING(status, value, "type", "Goal posts must have a type");
+			if (type != target_type::from_string(value["type"].get<std::string>())) {
+				status.success = false;
+				status.error_msg << "Trying to parse the wrong type of target";
+				return;
 			}
-			if (!value.contains("goal-post-1") || !value["goal-post-1"].is_object()) {
-				throw std::runtime_error{"goal posts must have a first post"};
-			}
-			goal_post_1.parse(value["goal-post-1"]);
-
-			if (!value.contains("goal-post-2") || !value["goal-post-2"].is_object()) {
-				throw std::runtime_error{"goal posts must have a second post"};
-			}
-			goal_post_2.parse(value["goal-post-2"]);
-
-			if (!value.contains("goal-post-center") || !value["goal-post-center"].is_object()) {
-				throw std::runtime_error{"goal posts must have a center"};
-			}
-			goal_post_center.parse(value["goal-post-center"]);
+			REQUIRE_CHILD(status, value, "goal-posts-1", goal_post_1, "Missing goal post");
+			REQUIRE_CHILD(status, value, "goal-posts-2", goal_post_2, "Missing goal post");
+			REQUIRE_CHILD(status, value, "goal-posts-center", goal_post_center, "Missing goal post");
 		}
 
 		void to_json(billiards::json::SaxWriter& writer) const override {
@@ -99,9 +90,11 @@ namespace billiards::shots {
 	};
 
 	namespace targets {
-		std::shared_ptr <Target> parse(const nlohmann::json& value) {
-			if (!value.contains("type") || !value["type"].is_string()) {
-				throw std::runtime_error{"Missing type"};
+		std::shared_ptr<Target> parse(const nlohmann::json& value, json::ParseResult& status) {
+			if (!HAS_STRING(value, "type")) {
+				status.success = false;
+				status.error_msg << "Missing type";
+				return nullptr;
 			}
 			auto type = target_type::from_string(value["type"].get<std::string>());
 			std::shared_ptr <Target> ret;
@@ -113,9 +106,11 @@ namespace billiards::shots {
 				}
 				case target_type::UNKNOWN:
 				default:
-					throw std::runtime_error{"Unknown type"};
+					status.success = false;
+					status.error_msg << "Unknown type";
+					return nullptr;
 			}
-			ret->parse(value);
+			ret->parse(value, status);
 			return ret;
 		}
 	}

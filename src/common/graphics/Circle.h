@@ -24,16 +24,11 @@ namespace billiards::graphics {
 		Circle() : Circle{geometry::Point{}, 0.0} {}
 		~Circle() override = default;
 
-		void parse(const nlohmann::json& value) override {
-			if (!value.contains("center") || !value["center"].is_object()) {
-				throw std::runtime_error{"circles must have a radius"};
-			}
-			center.parse(value["center"]);
-			if (!value.contains("r") || !value["r"].is_number()) {
-				throw std::runtime_error{"circles must have a radius"};
-			}
-			radius = value["r"];
-			ShapeGraphics::parse(value);
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			REQUIRE_CHILD(status, value, "center", center, "circles must have a center");
+			ENSURE_NUMBER(status, value, "r", "circles must have a radius");
+			radius = value["r"].get<double>();
+			ShapeGraphics::parse(value, status);
 		}
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
