@@ -5,6 +5,9 @@
 #ifndef IDEA_SHOTHELPERS_H
 #define IDEA_SHOTHELPERS_H
 
+#include "common/config/Table.h"
+#include "common/shots/Locations.h"
+
 namespace billiards::shots {
 
 	[[nodiscard]] inline

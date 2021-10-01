@@ -27,6 +27,11 @@ namespace billiards::graphics {
 				std::pair{geometry::Point{x1, y1}, geometry::Point{x2, y2}});
 		}
 
+		inline
+		void append(const geometry::Point& p1, const geometry::Point& p2) {
+			segments.emplace_back(std::pair{p1, p2});
+		}
+
 		void parse(const nlohmann::json& value) override {
 			ShapeGraphics::parse(value);
 

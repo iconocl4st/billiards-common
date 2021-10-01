@@ -86,7 +86,9 @@ namespace billiards::utils {
 
 #define RETURN_SUCCESS_WITH_DATA(msg, name, data) do {				\
 	billiards::utils::DefaultResponse dr{msg, true, name, &data};	\
-	crow::response resp{billiards::json::dump(dr)};					\
+	crow::response resp{billiards::json::dump(dr)};          		\
+	resp.set_header("Content-Type", "application/json");			\
+	resp.set_header("Mime-type", "application/json");               \
 	resp.add_header("Access-Control-Allow-Origin", "*");			\
 	return resp;			 										\
 } while (false)
@@ -95,6 +97,8 @@ namespace billiards::utils {
 	billiards::utils::DefaultResponse dr{msg, false};		\
 	crow::response resp{billiards::json::dump(dr)};			\
 	resp.add_header("Access-Control-Allow-Origin", "*");	\
+	resp.set_header("Content-Type", "application/json");	\
+	resp.set_header("Mime-type", "application/json");       \
 	return resp;			 								\
 } while (false)
 
@@ -104,6 +108,8 @@ namespace billiards::utils {
 	x["success"] = true;									\
 	x["message"] = msg;             						\
     crow::response resp{x};									\
+	resp.set_header("Content-Type", "application/json");	\
+	resp.set_header("Mime-type", "application/json");       \
 	resp.add_header("Access-Control-Allow-Origin", "*");	\
 	return resp;			 								\
 } while (false)
@@ -113,6 +119,8 @@ namespace billiards::utils {
 	x["success"] = false;									\
 	x["message"] = msg;             						\
     crow::response resp{x};									\
+	resp.set_header("Content-Type", "application/json");	\
+	resp.set_header("Mime-type", "application/json");       \
 	resp.add_header("Access-Control-Allow-Origin", "*");	\
 	return resp;			 								\
 } while (false)
@@ -133,6 +141,8 @@ namespace billiards::utils {
 			x["message"] = "retrieved uptime";									\
 			x["up-time"] = (std::time(0) - start_time);							\
 			crow::response resp{x};												\
+			resp.set_header("Content-Type", "application/json");				\
+			resp.set_header("Mime-type", "application/json");       			\
 			resp.add_header("Access-Control-Allow-Origin", "*");				\
 			return resp;														\
 		} else if (req.method == "PUT"_method) {								\

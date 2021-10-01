@@ -25,9 +25,17 @@ namespace billiards::config {
 		constexpr int RIGHT_LOWER_POCKET = 0;
 		constexpr int MIDDLE_LOWER_POCKET = 1;
 		constexpr int LEFT_LOWER_POCKET = 2;
-		constexpr int RIGHT_UPPER_POCKET = 3;
+		constexpr int LEFT_UPPER_POCKET = 3;
 		constexpr int MIDDLE_UPPER_POCKET = 4;
-		constexpr int LEFT_UPPER_POCKET = 5;
+		constexpr int RIGHT_UPPER_POCKET = 5;
+
+
+		constexpr int RIGHT_RAIL = 0;
+		constexpr int UPPER_RIGHT_RAIL = 1;
+		constexpr int UPPER_LEFT_RAIL = 2;
+		constexpr int LEFT_RAIL = 3;
+		constexpr int LOWER_LEFT_RAIL = 4;
+		constexpr int LOWER_RIGHT_RAIL = 5;
 	}
 
 	class Table : public json::Serializable {
@@ -106,17 +114,44 @@ namespace billiards::config {
 		[[nodiscard]] inline
 		Rail rail(int rail_index) const {
 			switch (rail_index) {
-				case 0: return rail(constants::RIGHT_LOWER_POCKET, constants::RIGHT_UPPER_POCKET);
-				case 1: return rail(constants::RIGHT_UPPER_POCKET, constants::MIDDLE_UPPER_POCKET);
-				case 2: return rail(constants::MIDDLE_UPPER_POCKET, constants::LEFT_UPPER_POCKET);
-				case 3: return rail(constants::LEFT_UPPER_POCKET, constants::LEFT_LOWER_POCKET);
-				case 4: return rail(constants::LEFT_LOWER_POCKET, constants::MIDDLE_LOWER_POCKET);
-				case 5: return rail(constants::MIDDLE_LOWER_POCKET, constants::RIGHT_LOWER_POCKET);
+				case constants::RIGHT_RAIL: return rail(constants::RIGHT_LOWER_POCKET, constants::RIGHT_UPPER_POCKET);
+				case constants::UPPER_RIGHT_RAIL: return rail(constants::RIGHT_UPPER_POCKET, constants::MIDDLE_UPPER_POCKET);
+				case constants::UPPER_LEFT_RAIL: return rail(constants::MIDDLE_UPPER_POCKET, constants::LEFT_UPPER_POCKET);
+				case constants::LEFT_RAIL: return rail(constants::LEFT_UPPER_POCKET, constants::LEFT_LOWER_POCKET);
+				case constants::LOWER_LEFT_RAIL: return rail(constants::LEFT_LOWER_POCKET, constants::MIDDLE_LOWER_POCKET);
+				case constants::LOWER_RIGHT_RAIL: return rail(constants::MIDDLE_LOWER_POCKET, constants::RIGHT_LOWER_POCKET);
 				default:
 					throw std::runtime_error{"Invalid rail index"};
 			}
 		}
 
+		[[nodiscard]] inline
+		bool is_incident(int pocket_index, int rail_index) const {
+			switch (pocket_index) {
+				case constants::RIGHT_LOWER_POCKET:
+					return rail_index == constants::RIGHT_RAIL
+						   || rail_index == constants::LOWER_RIGHT_RAIL;
+				case constants::MIDDLE_LOWER_POCKET:
+					return rail_index == constants::LOWER_RIGHT_RAIL
+						   || rail_index == constants::LOWER_LEFT_RAIL;
+				case constants::LEFT_LOWER_POCKET:
+					return rail_index == constants::LOWER_LEFT_RAIL
+						   || rail_index == constants::LEFT_RAIL;
+				case constants::LEFT_UPPER_POCKET:
+					return rail_index == constants::LEFT_RAIL
+						   || rail_index == constants::UPPER_LEFT_RAIL;
+				case constants::MIDDLE_UPPER_POCKET:
+					return rail_index == constants::UPPER_LEFT_RAIL
+						   || rail_index == constants::UPPER_RIGHT_RAIL;
+				case constants::RIGHT_UPPER_POCKET:
+					return rail_index == constants::UPPER_RIGHT_RAIL
+						   || rail_index == constants::RIGHT_RAIL;
+				default:
+					throw std::runtime_error{"Invalid pocket index"};
+			}
+		}
+
+		[[nodiscard]] inline
 		const Pocket& get_pocket(int pocket_index) const {
 			if (pocket_index < 0 || pocket_index >= pockets.size()) {
 				throw std::runtime_error{"Invalid pocket"};

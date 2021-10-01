@@ -18,6 +18,14 @@ namespace billiards::shots {
 		Shot() = default;
 		virtual ~Shot() = default;
 
+		void operator=(const Shot& other) {
+			steps.clear();
+
+			for (const auto& it : other.steps) {
+				steps.push_back(it);
+			}
+		}
+
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
 			writer.key("steps");

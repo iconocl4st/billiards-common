@@ -61,6 +61,29 @@ namespace billiards::geometry {
 		auto p = projection(line, point);
 		return point + (p - point) * 2;
 	}
+
+
+
+	[[nodiscard]] inline
+	MaybePoint project_onto_segment(
+		const MaybePoint& l1,
+		const MaybePoint& l2,
+		const MaybePoint& p
+	) {
+		const auto diff = l2 - l1;
+		const auto t1 = (p - l1).dot(diff) / diff.norm2();
+		const auto t2 = t1.max(0).min(1);
+		return l1 + diff * t2;
+	}
+
+	[[nodiscard]] inline
+	MaybeDouble distance_to_segment(
+		const MaybePoint& l1,
+		const MaybePoint& l2,
+		const MaybePoint& p
+	) {
+		return (p - project_onto_segment(l1, l2, p)).norm();
+	}
 }
 
 #endif //GLVIEW_GEOMETRY_H
