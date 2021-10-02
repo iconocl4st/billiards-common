@@ -174,7 +174,7 @@ namespace billiards::config {
 				pocket.to_json(writer);
 			}
 			writer.end_array();
-			writer.key("dimenions");
+			writer.key("dimensions");
 			dims.to_json(writer);
 			writer.end_object();
 		};

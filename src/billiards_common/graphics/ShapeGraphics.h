@@ -26,7 +26,7 @@ namespace billiards::graphics {
 			PARSE_CHILD(result, value["color"], color);
 
 			const bool has_fill = HAS_BOOL(value, "fill");
-			const bool has_width = HAS_BOOL(value, "line-width");
+			const bool has_width = HAS_NUMBER(value, "line-width");
 			if (!has_fill && !has_width) {
 				result.success = false;
 				result.error_msg << "shapes must either have a fill or a line width";

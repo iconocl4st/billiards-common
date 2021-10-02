@@ -82,7 +82,7 @@ namespace billiards::config {
 			writer.field("name", name);
 			writer.key("color");
 			color.to_json(writer);
-			writer.field("ball-type", ball_type::to_string(ball_type));
+			writer.field("type", ball_type::to_string(ball_type));
 			writer.end_object();
 		}
 		
@@ -94,7 +94,7 @@ namespace billiards::config {
 			ENSURE_STRING(status, value, "name", "Ball info must have a name");
 			name = value["name"].get<std::string>();
 			ENSURE_STRING(status, value, "type", "Ball info must have a type");
-			ball_type = ball_type::from_string(value["ball-type"].get<std::string>());
+			ball_type = ball_type::from_string(value["type"].get<std::string>());
 			REQUIRE_CHILD(status, value, "color", color, "Ball info must have a color");
 		}
 	};

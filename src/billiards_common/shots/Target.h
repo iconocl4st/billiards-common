@@ -64,18 +64,6 @@ namespace billiards::shots {
 			};
 		}
 
-		void parse(const nlohmann::json& value, json::ParseResult& status) override {
-			ENSURE_STRING(status, value, "type", "Goal posts must have a type");
-			if (type != target_type::from_string(value["type"].get<std::string>())) {
-				status.success = false;
-				status.error_msg << "Trying to parse the wrong type of target";
-				return;
-			}
-			REQUIRE_CHILD(status, value, "goal-posts-1", goal_post_1, "Missing goal post");
-			REQUIRE_CHILD(status, value, "goal-posts-2", goal_post_2, "Missing goal post");
-			REQUIRE_CHILD(status, value, "goal-posts-center", goal_post_center, "Missing goal post");
-		}
-
 		void to_json(billiards::json::SaxWriter& writer) const override {
 			writer.begin_object();
 			writer.field("type", target_type::to_string(type));
@@ -86,6 +74,18 @@ namespace billiards::shots {
 			writer.key("goal-post-center");
 			goal_post_center.to_json(writer);
 			writer.end_object();
+		}
+
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_STRING(status, value, "type", "Goal posts must have a type");
+			if (type != target_type::from_string(value["type"].get<std::string>())) {
+				status.success = false;
+				status.error_msg << "Trying to parse the wrong type of target";
+				return;
+			}
+			REQUIRE_CHILD(status, value, "goal-post-1", goal_post_1, "Missing goal post");
+			REQUIRE_CHILD(status, value, "goal-post-2", goal_post_2, "Missing goal post");
+			REQUIRE_CHILD(status, value, "goal-post-center", goal_post_center, "Missing goal post");
 		}
 	};
 

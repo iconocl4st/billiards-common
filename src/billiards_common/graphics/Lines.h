@@ -31,20 +31,20 @@ namespace billiards::graphics {
 			segments.emplace_back(std::pair{p1, p2});
 		}
 
-		void parse(const nlohmann::json& value, json::ParseResult& result) override {
-			ENSURE_ARRAY(result, value, "segments", "lines must have segments");
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			ENSURE_ARRAY(status, value, "segments", "lines must have segments");
 
 			segments.clear();
 			for (const auto& segment: value["segments"]) {
-				ENSURE_OBJECT(result, segment, "begin", "segments must have a begin");
+				ENSURE_OBJECT(status, segment, "begin", "segments must have a begin");
 				geometry::Point begin;
-				PARSE_CHILD(result, value["begin"], begin);
-				ENSURE_OBJECT(result, segment, "end", "segments must have an end");
+				PARSE_CHILD(status, segment["begin"], begin);
+				ENSURE_OBJECT(status, segment, "end", "segments must have an end");
 				geometry::Point end;
-				PARSE_CHILD(result, value["end"], end);
-				segments.emplace_back(std::pair{begin, end});
+				PARSE_CHILD(status, segment["end"], end);
+				segments.push_back(std::pair{begin, end});
 			}
-			ShapeGraphics::parse(value, result);
+			ShapeGraphics::parse(value, status);
 		}
 
 		void to_json(json::SaxWriter& writer) const override {
