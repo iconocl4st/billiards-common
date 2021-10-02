@@ -7,7 +7,8 @@
 
 #include <cmath>
 #include <optional>
-#include "tolerance.h"
+
+#include "billiards_common/geometry/tolerance.h"
 
 namespace billiards::geometry {
 

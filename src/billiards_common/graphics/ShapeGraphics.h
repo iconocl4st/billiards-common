@@ -5,9 +5,8 @@
 #ifndef GLVIEW_SHAPEGRAPHICS_H
 #define GLVIEW_SHAPEGRAPHICS_H
 
-#include "GraphicsPrimitive.h"
-
-#include "Color.h"
+#include "billiards_common/graphics/GraphicsPrimitive.h"
+#include "billiards_common/graphics/Color.h"
 
 namespace billiards::graphics {
 

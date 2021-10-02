@@ -5,7 +5,7 @@
 #ifndef IDEA_SHOTSTEPINFO_H
 #define IDEA_SHOTSTEPINFO_H
 
-#include "StepDestination.h"
+#include "billiards_common/shots/StepDestination.h"
 
 namespace billiards::shots {
 

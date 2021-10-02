@@ -5,7 +5,7 @@
 #ifndef IDEA_IMAGE_H
 #define IDEA_IMAGE_H
 
-#include "GraphicsPrimitive.h"
+#include "billiards_common/graphics/GraphicsPrimitive.h"
 
 #include "billiards_common/geometry/Point.h"
 

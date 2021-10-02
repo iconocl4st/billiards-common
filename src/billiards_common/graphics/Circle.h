@@ -5,7 +5,7 @@
 #ifndef GLVIEW_CIRCLE_H
 #define GLVIEW_CIRCLE_H
 
-#include "ShapeGraphics.h"
+#include "billiards_common/graphics/ShapeGraphics.h"
 
 #include "billiards_common/geometry/Point.h"
 

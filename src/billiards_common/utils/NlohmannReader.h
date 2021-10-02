@@ -5,7 +5,7 @@
 #ifndef GLVIEW_NLOHMANNREADER_H
 #define GLVIEW_NLOHMANNREADER_H
 
-#include "SaxReader.h"
+#include "billiards_common/utils/SaxReader.h"
 #include "billiards_common/3rd_party/nlohmann.hpp"
 
 namespace billiards::json {

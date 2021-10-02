@@ -8,9 +8,9 @@
 #include "billiards_common/geometry/Dimensions.h"
 #include "billiards_common/geometry/geometry.h"
 
-#include "Ball.h"
-#include "Pocket.h"
-#include "Rail.h"
+#include "billiards_common/config/Ball.h"
+#include "billiards_common/config/Pocket.h"
+#include "billiards_common/config/Rail.h"
 
 #define POCKET_DEF(X, Y, THETA) Pocket{ \
 	geometry::Point{X + 3.0 * std::cos(THETA + M_PI / 4), Y + 3.0 * std::sin(THETA + M_PI / 4)},	\

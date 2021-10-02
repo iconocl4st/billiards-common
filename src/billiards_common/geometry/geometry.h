@@ -5,7 +5,7 @@
 #ifndef GLVIEW_GEOMETRY_H
 #define GLVIEW_GEOMETRY_H
 
-#include "Maybe.h"
+#include "billiards_common/geometry/Maybe.h"
 
 namespace billiards::geometry {
 

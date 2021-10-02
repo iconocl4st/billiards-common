@@ -5,7 +5,7 @@
 #ifndef IDEA_LOCATEDBALL_H
 #define IDEA_LOCATEDBALL_H
 
-#include "VirtualBall.h"
+#include "billiards_common/shots/VirtualBall.h"
 #include "billiards_common/geometry/Point.h"
 
 namespace billiards::layout {

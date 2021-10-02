@@ -6,10 +6,10 @@
 #define IDEA_TEXT_H
 
 
-#include "GraphicsPrimitive.h"
+#include "billiards_common/graphics/GraphicsPrimitive.h"
 
 #include "billiards_common/geometry/Point.h"
-#include "Color.h"
+#include "billiards_common/graphics/Color.h"
 
 namespace billiards::graphics {
 

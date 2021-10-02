@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "LocatedBall.h"
+#include "billiards_common/shots/LocatedBall.h"
 #include "billiards_common/geometry/Dimensions.h"
 
 namespace billiards::layout {

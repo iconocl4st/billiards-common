@@ -7,7 +7,7 @@
 
 #include <list>
 
-#include "ShapeGraphics.h"
+#include "billiards_common/graphics/ShapeGraphics.h"
 #include "billiards_common/geometry/Point.h"
 
 namespace billiards::graphics {

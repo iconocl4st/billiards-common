@@ -5,8 +5,8 @@
 #ifndef GLVIEW_SHOTINFORMATION_H
 #define GLVIEW_SHOTINFORMATION_H
 
-#include "Shot.h"
-#include "CueingInfo.h"
+#include "billiards_common/shots/Shot.h"
+#include "billiards_common/shots/CueingInfo.h"
 
 namespace billiards::shots {
 

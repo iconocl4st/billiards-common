@@ -8,8 +8,7 @@
 #include <sstream>
 
 #include "billiards_common/3rd_party/nlohmann.hpp"
-
-#include "SaxWriter.h"
+#include "billiards_common/utils/SaxWriter.h"
 
 namespace billiards::json {
 

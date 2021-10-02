@@ -5,11 +5,10 @@
 #ifndef GLVIEW_NLOHMANN_WRITER_H
 #define GLVIEW_NLOHMANN_WRITER_H
 
-#include "SaxWriter.h"
-
 #include <list>
 #include <iostream>
 
+#include "billiards_common/utils/SaxWriter.h"
 #include "billiards_common/3rd_party/nlohmann.hpp"
 
 namespace billiards::json {

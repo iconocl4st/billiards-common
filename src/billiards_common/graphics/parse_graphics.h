@@ -5,9 +5,9 @@
 #ifndef GLVIEW_PARSE_GRAPHICS_H
 #define GLVIEW_PARSE_GRAPHICS_H
 
-#include "Circle.h"
-#include "Lines.h"
-#include "Polygon.h"
+#include "billiards_common/graphics/Circle.h"
+#include "billiards_common/graphics/Lines.h"
+#include "billiards_common/graphics/Polygon.h"
 
 namespace billiards::graphics {
 	inline

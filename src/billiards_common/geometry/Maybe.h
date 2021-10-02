@@ -5,8 +5,8 @@
 #ifndef IDEA_MAYBE_H
 #define IDEA_MAYBE_H
 
-#include "Point.h"
-#include "Line.h"
+#include "billiards_common/geometry/Point.h"
+#include "billiards_common/geometry/Line.h"
 
 /*
  *

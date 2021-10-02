@@ -5,9 +5,9 @@
 #ifndef GLVIEW_BALLDIMENSIONS_H
 #define GLVIEW_BALLDIMENSIONS_H
 
-#include "billiards_common/graphics/Color.h"
-
 #include <array>
+
+#include "billiards_common/graphics/Color.h"
 
 namespace billiards::config {
 

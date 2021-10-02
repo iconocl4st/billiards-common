@@ -9,7 +9,7 @@
 
 #include "billiards_common/geometry/Maybe.h"
 
-#include "Target.h"
+#include "billiards_common/shots/Target.h"
 
 namespace billiards::shots {
 

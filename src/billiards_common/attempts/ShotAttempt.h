@@ -7,7 +7,7 @@
 
 #include "billiards_common/shots/Shot.h"
 #include "billiards_common/shots/Positions.h"
-#include "AttemptResult.h"
+#include "billiards_common/attempts/AttemptResult.h"
 
 namespace billiards::attempts {
 

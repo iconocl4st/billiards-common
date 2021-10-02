@@ -11,7 +11,7 @@
 #include <optional>
 
 #include "billiards_common/utils/Serializable.h"
-#include "tolerance.h"
+#include "billiards_common/geometry/tolerance.h"
 
 namespace billiards::geometry {
 

@@ -9,7 +9,7 @@
 #include <list>
 
 #include "billiards_common/geometry/Point.h"
-#include "ShapeGraphics.h"
+#include "billiards_common/graphics/ShapeGraphics.h"
 
 namespace billiards::graphics {
 

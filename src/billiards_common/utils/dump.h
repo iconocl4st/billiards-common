@@ -6,8 +6,8 @@
 #define GLVIEW_DUMP_H
 
 
-#include "Serializable.h"
-#include "NlohmannWriter.h"
+#include "billiards_common/utils/Serializable.h"
+#include "billiards_common/utils/NlohmannWriter.h"
 
 namespace billiards::json {
 

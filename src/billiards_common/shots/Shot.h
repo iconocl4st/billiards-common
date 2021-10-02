@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "ShotStep.h"
+#include "billiards_common/shots/ShotStep.h"
 
 namespace billiards::shots {
 

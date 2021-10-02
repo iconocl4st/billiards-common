@@ -5,11 +5,11 @@
 #ifndef IDEA_GRAPHICSRECEIVER_H
 #define IDEA_GRAPHICSRECEIVER_H
 
-#include "Lines.h"
-#include "Polygon.h"
-#include "Circle.h"
-#include "Text.h"
-#include "Image.h"
+#include "billiards_common/graphics/Lines.h"
+#include "billiards_common/graphics/Polygon.h"
+#include "billiards_common/graphics/Circle.h"
+#include "billiards_common/graphics/Text.h"
+#include "billiards_common/graphics/Image.h"
 
 namespace billiards::graphics {
 	class GraphicsReceiver {

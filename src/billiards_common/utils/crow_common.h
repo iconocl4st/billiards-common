@@ -5,7 +5,7 @@
 #ifndef GLVIEW_DEFAULT_RESONSE_H
 #define GLVIEW_DEFAULT_RESONSE_H
 
-#include "dump.h"
+#include "billiards_common/utils/dump.h"
 
 namespace billiards::utils {
 
