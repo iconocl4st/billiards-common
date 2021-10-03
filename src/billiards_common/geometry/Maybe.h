@@ -329,6 +329,12 @@ namespace billiards::geometry {
 
 		~MaybePoint() = default;
 
+		friend
+		std::ostream& operator<<(std::ostream& os, const MaybePoint& p) {
+			os << "{x:" << p.x << ",y:" << p.y << "}";
+			return os;
+		}
+
 		void parse(const nlohmann::json& value, json::ParseResult& status) override {
 			if (HAS_NUMBER(value, "x")) {
 				x = value["x"].get<double>();

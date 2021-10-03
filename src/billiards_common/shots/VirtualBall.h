@@ -79,8 +79,12 @@ namespace billiards::layout::vball {
 		virtual_type::VirtualBallType type;
 		int number;
 
-		VirtualBall(int number) : type{virtual_type::NUMBER}, number{number} {}
-		VirtualBall() : type{virtual_type::ANY_OBJECT}, number{-1} {}
+		VirtualBall(virtual_type::VirtualBallType type, int number)
+			: type{type}
+			, number{number}
+		{}
+		VirtualBall(int number) : VirtualBall{virtual_type::NUMBER, number} {}
+		VirtualBall() : VirtualBall{virtual_type::ANY_OBJECT, -1} {}
 
 		~VirtualBall() override = default;
 

@@ -18,6 +18,13 @@ namespace billiards::json {
 		return writer.get_root().dump();
 	}
 
+	std::string pretty_dump(const Serializable& obj) {
+		NlohmannWriter writer;
+		SaxWriter& w{writer};
+		obj.to_json(w);
+		return writer.get_root().dump(2);
+	}
+
 //	std::string parse(const Serializable& obj) {
 //		NlohmannReader reader;
 //		SaxWriter& w{writer};

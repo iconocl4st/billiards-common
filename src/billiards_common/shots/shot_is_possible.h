@@ -38,11 +38,31 @@ namespace billiards::shots {
 			for (const auto& prev : previous_ghosts) {
 				for (const auto& cur : current_posts->posts()) {
 					for (const auto& next : next_posts->posts()) {
-						auto dir1 = cur - prev;
-						auto dir2 = next - cur;
-						auto dot = dir1.dot(dir2);
-						if (!dot.is_valid() || dot.get() < 0) {
+						const auto dir1 = cur - prev;
+						const auto dir2 = next - cur;
+						const auto dot = dir1.dot(dir2);
+						if (!dot.is_valid()) {
 							return false;
+						}
+						switch (step->type) {
+							case step_type::RAIL: {
+								if (dot.get() > 0) {
+									return false;
+								}
+								break;
+							}
+							case step_type::STRIKE: {
+								if (dot.get() < 0) {
+									return false;
+								}
+								break;
+							}
+							case step_type::CUE:
+							case step_type::POCKET:
+							case step_type::KISS:
+								// TODO: Implement me
+							case step_type::UNKNOWN:
+								return false;
 						}
 					}
 				}

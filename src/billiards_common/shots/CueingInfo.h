@@ -29,7 +29,6 @@ namespace billiards::shots {
 			if (upper_cut_angle.is_valid()) {
 				writer.field("upper-cut-angle", upper_cut_angle.get());
 			}
-			std::cout << "Precision: " << precision.get() << std::endl;
 			writer.field("precision", precision.get());
 			writer.key("cue-location");
 			cue_location.to_json(writer);
