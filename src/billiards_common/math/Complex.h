@@ -7,9 +7,10 @@
 
 namespace billiards::math {
 
+	// TODO: Didn't realize c had its own complex type...
 
 #define TOL 1e-15
-#define LARGER_TOL 1e-8
+#define LARGER_TOL 1e-7
 
 	class Complex {
 	public:
