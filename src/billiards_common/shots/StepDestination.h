@@ -8,27 +8,35 @@
 #include <memory>
 
 #include "billiards_common/geometry/Maybe.h"
-
+//#include "billiards_common/shots/Locations.h"
 #include "billiards_common/shots/Target.h"
 
 namespace billiards::shots {
 
-		class Destination : public billiards::json::Serializable {
+	// Rename to StepInfo
+		class StepInfo : public billiards::json::Serializable {
 		public:
 			int step_index;
-			std::shared_ptr<Target> target;
 
-			Destination() = default;
-			Destination(int step_index) : step_index{step_index}, target{nullptr} {}
-			virtual ~Destination() = default;
+			std::shared_ptr<GoalPostTarget> target;
+
+
+			StepInfo() = default;
+			StepInfo(int step_index) : step_index{step_index}, target{nullptr} {}
+			virtual ~StepInfo() = default;
+
+//			void assign_exiting(const layout::Locations& locations, int ball_index) {
+//				exiting_source = locations.balls[ball_index].location;
+//				exiting_type = locations.balls[ball_index].ball;
+//			}
 
 			void parse(const nlohmann::json& value, json::ParseResult& status) override {
-				ENSURE_OBJECT(status, value, "target", "Destination must have a target");
+				ENSURE_OBJECT(status, value, "target", "StepInfo must have a target");
 				target = targets::parse(value["target"], status);
 				if (!status.success) {
 					return;
 				}
-				ENSURE_NUMBER(status, value, "step-index", "Destination must have a step index");
+				ENSURE_NUMBER(status, value, "step-index", "StepInfo must have a step index");
 				step_index = value["step-index"].get<int>();
 			}
 

@@ -96,25 +96,63 @@ namespace billiards::shots {
 		}
 	};
 
+	namespace kt {
+		enum kiss_type {
+			STUN,
+			ROLLING,
+			UNKNOWN,
+		};
+
+		[[nodiscard]] inline
+		std::string to_string(kiss_type type) {
+			switch (type) {
+				case STUN:
+					return "stun";
+				case ROLLING:
+					return "rolling";
+				case UNKNOWN:
+				default:
+					return "unknown";
+			}
+		}
+
+		[[nodiscard]] inline
+		kiss_type from_string(const std::string& type) {
+			if (type == "stun") {
+				return kiss_type::STUN;
+			} else if (type == "rolling") {
+				return kiss_type::ROLLING;
+			} else {
+				return kiss_type::UNKNOWN;
+			}
+		}
+
+	}
 
 	class KissStep : public ShotStep {
 	public:
 		int kissed_ball;
+		kt::kiss_type type;
 
-		KissStep(int kissed)
+		KissStep(int kissed, kt::kiss_type type)
 			: ShotStep{step_type::KISS}
+			, type{type}
 			, kissed_ball{kissed}
 		{}
 
-		KissStep() : KissStep{-1} {}
+		KissStep() : KissStep{-1, kt::ROLLING} {}
 
 		void write_details(json::SaxWriter& writer) const override {
 			writer.field("kissed-ball", kissed_ball);
+			writer.field("type", kt::to_string(type));
 		}
 
 		void parse(const nlohmann::json& value, json::ParseResult& status) override {
 			ENSURE_NUMBER(status, value, "kissed-ball", "must have a kissed ball");
+			// must be positive...
 			kissed_ball = value["kissed-ball"].get<int>();
+			ENSURE_STRING(status, value, "type", "must have a kiss type");
+			type = kt::from_string(value["type"]);
 		}
 	};
 

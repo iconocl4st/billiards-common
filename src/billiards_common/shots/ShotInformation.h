@@ -14,15 +14,16 @@ namespace billiards::shots {
 	public:
 		Shot shot;
 		CueingInfo cueing;
-		std::vector<Destination> destinations;
+		std::vector<StepInfo> destinations;
+		bool valid_calculations;
 
-		ShotInformation(Shot shot) : shot{shot}, cueing{}, destinations{} {}
-		ShotInformation() : shot{}, cueing{}, destinations{} {}
+		ShotInformation(Shot shot) : shot{shot}, cueing{}, destinations{}, valid_calculations{true} {}
+		ShotInformation() : shot{}, cueing{}, destinations{}, valid_calculations{true} {}
 
 		~ShotInformation() override = default;
 
 		[[nodiscard]] inline
-		std::shared_ptr<ShotStep>& get_step(const Destination& dest) {
+		std::shared_ptr<ShotStep>& get_step(const StepInfo& dest) {
 			const int step_index = dest.step_index;
 			if (step_index < 0 || step_index >= shot.steps.size()) {
 				throw std::runtime_error{"Invalid index"};
@@ -31,7 +32,7 @@ namespace billiards::shots {
 		}
 
 		[[nodiscard]] inline
-		const std::shared_ptr<ShotStep>& get_step(const Destination& dest) const {
+		const std::shared_ptr<ShotStep>& get_step(const StepInfo& dest) const {
 			const int step_index = dest.step_index;
 			if (step_index < 0 || step_index >= shot.steps.size()) {
 				throw std::runtime_error{"Invalid index"};
@@ -40,12 +41,12 @@ namespace billiards::shots {
 		}
 
 		template<class StepType>
-		std::shared_ptr<StepType> get_typed_step(const Destination& dest) const {
+		std::shared_ptr<StepType> get_typed_step(const StepInfo& dest) const {
 			return std::dynamic_pointer_cast<StepType>(get_step(dest));
 		}
 
 		[[nodiscard]] inline
-		step_type::ShotStepType get_shot_type(const Destination& dest) const {
+		step_type::ShotStepType get_shot_type(const StepInfo& dest) const {
 			return get_step(dest)->type;
 		}
 
@@ -55,6 +56,14 @@ namespace billiards::shots {
 				throw std::runtime_error{"Invalid destination index"};
 			}
 			return get_shot_type(destinations[dest_index]);
+		}
+
+		[[nodiscard]] inline
+		StepInfo& get_destination(int dest_index) const {
+			if (dest_index < 0 || dest_index >= destinations.size()) {
+				throw std::runtime_error{"Invalid destination index"};
+			}
+			return destinations[index];
 		}
 
 		void to_json(json::SaxWriter& writer) const override {
