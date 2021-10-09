@@ -11,40 +11,51 @@ namespace billiards::shots {
 
 	class CueingInfo : public billiards::json::Serializable {
 	public:
-		geometry::MaybeDouble lower_cut_angle;
-		geometry::MaybeDouble upper_cut_angle;
-
-		// TODO: remove the maybes
 		geometry::MaybeDouble precision;
-		geometry::MaybePoint cue_location;
+		geometry::Point cue_location;
+		geometry::MaybeDouble cue_radius;
+		std::shared_ptr<std::array<double, 3>> cuts;
 
 		CueingInfo() = default;
 		~CueingInfo() override = default;
 
 		void to_json(billiards::json::SaxWriter& writer) const override {
 			writer.begin_object();
-			if (lower_cut_angle.is_valid()) {
-				writer.field("lower-cut-angle", lower_cut_angle.get());
-			}
-			if (upper_cut_angle.is_valid()) {
-				writer.field("upper-cut-angle", upper_cut_angle.get());
-			}
-			writer.field("precision", precision.get());
 			writer.key("cue-location");
 			cue_location.to_json(writer);
+			writer.field("cue-radius", cue_radius.get());
+			if (precision.is_valid()) {
+				writer.field("precision", precision.get());
+			}
+			if (cuts) {
+				writer.key("cuts");
+				writer.begin_array();
+				for (int i = 0; i < 3; i++) {
+					writer.value(cuts->at(i));
+				}
+				writer.end_array();
+			}
 			writer.end_object();
 		}
 
 		void parse(const nlohmann::json& value, json::ParseResult& status) override {
-			if (HAS_NUMBER(value, "lower-cut-angle")) {
-				lower_cut_angle = value["lower-cut-angle"].get<double>();
+			REQUIRE_CHILD(status, value, "cue-location", cue_location, "Cue info have a cue location");
+			ENSURE_NUMBER(status, value, "cue-radius", "Cue info must have a cue radius");
+			cue_radius = value["cue-radius"].get<double>();
+			if (HAS_NUMBER(value, "precision")) {
+				precision = value["precision"].get<double>();
 			}
-			if (HAS_NUMBER(value, "upper-cut-angle")) {
-				upper_cut_angle = value["upper-cut-angle"].get<double>();
+			if (HAS_ARRAY(value, "cuts")) {
+				cuts = std::make_shared<std::array<double, 3>>();
+				if (value["cuts"].size() != 3) {
+					status.success = false;
+					status.error_msg << "Expected 3 cuts, found: " << value["cuts"].size();
+					return;
+				}
+				for (int i = 0; i < 3; i++) {
+					cuts->at(i) = value["cuts"][i].get<double>();
+				}
 			}
-			ENSURE_NUMBER(status, value, "precision", "Cueing info must have a precision");
-			precision = value["precision"].get<double>();
-			REQUIRE_CHILD(status, value, "cue-location", cue_location, "Cueing info must have a cue location");
 		}
 	};
 }

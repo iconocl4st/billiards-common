@@ -68,6 +68,7 @@ namespace billiards::math {
 
 // Solve:
 // a00 + a10 * x + a20 * x ** 2 == 0
+	inline
 	void solve_20(
 		const double a00, const double a10, const double a20,
 		const double default_x, const double default_y,
@@ -80,6 +81,7 @@ namespace billiards::math {
 // Solve
 // a00 + a10 * x + a01 * y + a20 * x ** 2 == 0
 // TODO: There may be two solutions for default_y...
+	inline
 	void solve_21(
 		const double a00, const double a10, const double a01, const double a20,
 		const double default_x, const double default_y,
@@ -118,6 +120,7 @@ convert_powers(dc)
 convert_powers(db)
 convert_powers(da)
  */
+	inline
 	void solve_22(
 		const double a00, const double a10, const double a01, const double a20, const double a11, const double a02,
 		const double default_x, const double default_y,
@@ -175,6 +178,7 @@ convert_powers(da)
 // Solve:
 // a00 == 0
 // b00 + b10 * x + b01 * y + b20 * x ** 2 + b11 * x * y + b02 * y ** 2 == 0
+	inline
 	void solve_00_22(
 		const double a00,
 		const double b00, const double b10, const double b01, const double b20, const double b11, const double b02,
@@ -189,6 +193,7 @@ convert_powers(da)
 
 // Substitute x = x_val into
 // a00 + a10 * x + a01 * y + a20 * x ** 2 + a11 * x * y + a02 * y ** 2 == 0
+	inline
 	void subs_22_x(
 		const double x_val,
 		const double a00, const double a10, const double a01, const double a20, const double a11, const double a02,
@@ -204,6 +209,7 @@ convert_powers(da)
 
 // Substitute y = y_val into
 // a00 + a10 * x + a01 * y + a20 * x ** 2 + a11 * x * y + a02 * y ** 2 == 0
+	inline
 	void subs_22_y(
 		const double y_val,
 		const double a00, const double a10, const double a01, const double a20, const double a11, const double a02,
@@ -220,6 +226,7 @@ convert_powers(da)
 // Solve:
 // a00 + a10 * x == 0
 // b00 + b10 * x + b01 * y + b20 * x ** 2 + b11 * x * y + b02 * y ** 2 == 0
+	inline
 	void solve_01_22(
 		const double a00, const double a10,
 		const double b00, const double b10, const double b01, const double b20, const double b11, const double b02,
@@ -242,6 +249,7 @@ convert_powers(da)
 // Solve:
 // a00 + a10 * x + a20 * x ** 2 == 0
 // b00 + b10 * x + b01 * y + b20 * x ** 2 + b11 * x * y + b02 * y ** 2 == 0
+	inline
 	void solve_02_22(
 		const double a00, const double a10, const double a20,
 		const double b00, const double b10, const double b01, const double b20, const double b11, const double b02,
@@ -281,6 +289,7 @@ for coef, ord in poly.coefficients(x):
 	print('\t\tconst double q' + str(ord) + ' = ' + convert_powers(coef) + ';')
 
  */
+	inline
 	void solve_21_22(
 		const double a00, const double a10, const double a01, const double a20,
 		const double b00, const double b01, const double b10, const double b20, const double b11, const double b02,
@@ -312,6 +321,7 @@ for coef, ord in poly.coefficients(x):
 // Solve:
 // a0 * x^2 + p0 * x + q0 == 0
 // a1 * x^2 + p1 * x + q1 == 0
+	inline
 	void solve_20_20(
 		const double q0, const double p0, const double a0,
 		const double q1, const double p1, const double a1,
@@ -399,6 +409,7 @@ for coef, ord in eq3.coefficients(y):
 // 		f0 + d0 * x + e0 * y + a0 * x ** 2 + c0 * x * y + b0 * y ** 2 == 0
 // 		f1 + d1 * x + e1 * y + a1 * x ** 2 + c1 * x * y + b1 * y ** 2 == 0
 //
+	inline
 	void solve_22_22(
 		const double f0, const double d0, const double e0, const double a0, const double c0, const double b0,
 		const double f1, const double d1, const double e1, const double a1, const double c1, const double b1,

@@ -144,15 +144,15 @@ namespace billiards::shots {
 
 		void write_details(json::SaxWriter& writer) const override {
 			writer.field("kissed-ball", kissed_ball);
-			writer.field("type", kt::to_string(type));
+			writer.field("kiss-type", kt::to_string(type));
 		}
 
 		void parse(const nlohmann::json& value, json::ParseResult& status) override {
 			ENSURE_NUMBER(status, value, "kissed-ball", "must have a kissed ball");
 			// must be positive...
 			kissed_ball = value["kissed-ball"].get<int>();
-			ENSURE_STRING(status, value, "type", "must have a kiss type");
-			type = kt::from_string(value["type"]);
+			ENSURE_STRING(status, value, "kiss-type", "must have a kiss type");
+			type = kt::from_string(value["kiss-type"]);
 		}
 	};
 

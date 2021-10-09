@@ -57,7 +57,7 @@ namespace billiards::shots {
 		inline
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
-			writer.key("step-type", step_type::to_string(step_type));
+			writer.field("step-type", step_type::to_string(step_type));
 			writer.field("choice-type", wild_card::to_string(choices_type));
 
 			switch (choices_type) {

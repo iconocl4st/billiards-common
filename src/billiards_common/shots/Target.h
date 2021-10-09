@@ -5,6 +5,8 @@
 #ifndef IDEA_TARGET_H
 #define IDEA_TARGET_H
 
+#include "billiards_common/geometry/Maybe.h"
+
 namespace billiards::shots {
 //	namespace target_type {
 //		enum TargetType {
@@ -62,7 +64,12 @@ namespace billiards::shots {
 			writer.key("posts");
 			writer.begin_array();
 			for (const auto& post : posts) {
-				post.to_json(writer);
+				// TODO
+				if (post.is_valid()) {
+					post.to_json(writer);
+				} else {
+					geometry::Point{5, 5}.to_json(writer);
+				}
 			}
 			writer.end_array();
 			writer.end_object();
@@ -74,7 +81,7 @@ namespace billiards::shots {
 				///
 			}
 			for (int i = 0; i < 3; i++) {
-				posts[i].parse(value["posts"][i]);
+				PARSE_CHILD(status, value["posts"][i], posts[i]);
 			}
 		}
 	};

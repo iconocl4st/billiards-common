@@ -186,6 +186,13 @@ namespace billiards::geometry {
 			return !valid || std::abs(value) < TOLERANCE;
 		}
 
+		inline
+		MaybeDouble& operator+=(const MaybeDouble& other) {
+			valid &= other.valid;
+			value += other.value;
+			return *this;
+		}
+
 		[[nodiscard]] inline
 		MaybeDouble operator-() const {
 			return MaybeDouble{valid, -value};
@@ -411,6 +418,13 @@ namespace billiards::geometry {
 		[[nodiscard]] inline
 		MaybePoint operator+(const MaybePoint& other) const {
 			return MaybePoint{x + other.x, y + other.y};
+		}
+
+		inline
+		MaybePoint& operator+=(const MaybePoint& other) {
+			x += other.x;
+			y += other.y;
+			return *this;
 		}
 
 		[[nodiscard]] inline

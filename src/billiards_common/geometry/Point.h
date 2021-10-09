@@ -73,6 +73,12 @@ namespace billiards::geometry {
 			return Point{x + other.x, y + other.y};
 		}
 
+		Point& operator+=(const Point& other) {
+			x += other.x;
+			y += other.y;
+			return *this;
+		}
+
 		Point operator/(double val) const {
 			return Point{x / val, y / val};
 		}

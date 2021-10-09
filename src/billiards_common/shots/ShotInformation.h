@@ -14,13 +14,33 @@ namespace billiards::shots {
 	public:
 		Shot shot;
 		CueingInfo cueing;
-		std::vector<StepInfo> destinations;
-		bool valid_calculations;
+		std::vector<StepInfo> infos;
+		bool is_valid;
 
-		ShotInformation(Shot shot) : shot{shot}, cueing{}, destinations{}, valid_calculations{true} {}
-		ShotInformation() : shot{}, cueing{}, destinations{}, valid_calculations{true} {}
+		explicit ShotInformation(const Shot& shot)
+			: shot{shot}
+			, cueing{}
+			, infos{}
+			, is_valid{true}
+		{}
+		ShotInformation()
+			: shot{}
+			, cueing{}
+			, infos{}
+			, is_valid{true}
+		{}
 
 		~ShotInformation() override = default;
+
+		inline
+		void invalidate() {
+			is_valid = false;
+		}
+
+		inline
+		void update_validity(bool b) {
+			is_valid &= b;
+		}
 
 		[[nodiscard]] inline
 		std::shared_ptr<ShotStep>& get_step(const StepInfo& dest) {
@@ -52,18 +72,26 @@ namespace billiards::shots {
 
 		[[nodiscard]] inline
 		step_type::ShotStepType get_shot_type(int dest_index) const {
-			if (dest_index < 0 || dest_index >= destinations.size()) {
+			if (dest_index < 0 || dest_index >= infos.size()) {
 				throw std::runtime_error{"Invalid destination index"};
 			}
-			return get_shot_type(destinations[dest_index]);
+			return get_shot_type(infos[dest_index]);
 		}
 
 		[[nodiscard]] inline
-		StepInfo& get_destination(int dest_index) const {
-			if (dest_index < 0 || dest_index >= destinations.size()) {
+		const StepInfo& get_info(int dest_index) const {
+			if (dest_index < 0 || dest_index >= infos.size()) {
 				throw std::runtime_error{"Invalid destination index"};
 			}
-			return destinations[index];
+			return infos[dest_index];
+		}
+
+		[[nodiscard]] inline
+		StepInfo& get_info(int dest_index) {
+			if (dest_index < 0 || dest_index >= infos.size()) {
+				throw std::runtime_error{"Invalid destination index"};
+			}
+			return infos[dest_index];
 		}
 
 		void to_json(json::SaxWriter& writer) const override {
@@ -72,9 +100,9 @@ namespace billiards::shots {
 			shot.to_json(writer);
 			writer.key("cueing");
 			cueing.to_json(writer);
-			writer.key("destinations");
+			writer.key("infos");
 			writer.begin_array();
-			for (const auto& dest : destinations) {
+			for (const auto& dest : infos) {
 				dest.to_json(writer);
 			}
 			writer.end_array();
@@ -84,14 +112,16 @@ namespace billiards::shots {
 		void parse(const nlohmann::json& value, json::ParseResult& status) override {
 			REQUIRE_CHILD(status, value, "shot", shot, "Shot info must have a shot");
 			REQUIRE_CHILD(status, value, "cueing", cueing, "Shot info must have a cueing info");
-			ENSURE_ARRAY(status, value, "destinations", "Shot info must have destinations");
-			destinations.clear();
-			for (const auto& it: value["destinations"]) {
-				destinations.emplace_back();
-				PARSE_CHILD(status, it, destinations.back());
+			ENSURE_ARRAY(status, value, "infos", "Shot info must have destinations");
+			infos.clear();
+			for (const auto& it: value["infos"]) {
+				infos.emplace_back();
+				PARSE_CHILD(status, it, infos.back());
 			}
 		}
 	};
+
+
 }
 
 

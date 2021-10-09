@@ -20,59 +20,59 @@ namespace billiards::shots {
 	) {
 		// intersections...
 
-		std::list<geometry::Point> previous_ghosts;
+		std::shared_ptr<GoalPostTarget> previous_ghosts = std::make_shared<GoalPostTarget>();
 		auto *cs = (CueStep *) info.shot.steps[0].get();
-		const auto& lb = locations.balls[cs->cue_ball];
-		previous_ghosts.emplace_back(lb.location);
+		for (int i = 0; i < 3; i++) {
+			previous_ghosts->posts[i] = locations.balls[cs->cue_ball].location;
+		}
+		for (int i = 1; i < info.infos.size() - 1; i++) {
+			const auto& step = info.get_step(info.infos[i]);
 
-		for (int i = 0; i < info.destinations.size() - 1; i++) {
-			const auto& step = info.shot.steps[info.destinations[i].step_index];
-
-			const auto& current_posts = std::dynamic_pointer_cast<GoalPostTarget>(info.destinations[i].target);
-			const auto& next_posts = std::dynamic_pointer_cast<GoalPostTarget>(info.destinations[i+1].target);
+			const auto& current_posts = info.get_info(i).target;
+			const auto& next_posts = info.get_info(i + 1).target;
 
 //				for (const auto& cur : current_posts) {
 //					// check in bounds...
 //				}
 
-			for (const auto& prev : previous_ghosts) {
-				for (const auto& cur : current_posts->posts()) {
-					for (const auto& next : next_posts->posts()) {
-						const auto dir1 = cur - prev;
-						const auto dir2 = next - cur;
-						const auto dot = dir1.dot(dir2);
-						if (!dot.is_valid()) {
+			for (int j = 0; j < 3; j++) {
+				const auto& prev = previous_ghosts->posts[j];
+				const auto& cur = current_posts->posts[j];
+				const auto& next = next_posts->posts[j];
+
+				const auto dir1 = cur - prev;
+				const auto dir2 = next - cur;
+				const auto dot = dir1.dot(dir2);
+				if (!dot.is_valid()) {
+					return false;
+				}
+				switch (step->type) {
+					case step_type::RAIL: {
+						if (dot.get() > 0) {
 							return false;
 						}
-						switch (step->type) {
-							case step_type::RAIL: {
-								if (dot.get() > 0) {
-									return false;
-								}
-								break;
-							}
-							case step_type::STRIKE: {
-								if (dot.get() < 0) {
-									return false;
-								}
-								break;
-							}
-							case step_type::CUE:
-							case step_type::POCKET:
-							case step_type::KISS:
-								// TODO: Implement me
-							case step_type::UNKNOWN:
-								return false;
-						}
+						break;
 					}
+					case step_type::STRIKE: {
+						if (dot.get() < 0) {
+							return false;
+						}
+						break;
+					}
+					case step_type::CUE:
+					case step_type::POCKET:
+					case step_type::KISS:
+						// TODO: Implement me
+					case step_type::UNKNOWN:
+						return false;
 				}
 			}
 
 			switch (step->type) {
 				case step_type::RAIL: {
-					const auto& rail_step = info.get_typed_step<shots::RailStep>(info.destinations[i].step_index);
+					const auto& rail_step = info.get_typed_step<shots::RailStep>(info.get_info(i));
 					const auto& rail = table.rail(rail_step->rail);
-					for (const auto& post : current_posts->posts()) {
+					for (const auto& post : current_posts->posts) {
 						const auto& dist = distance_to_segment(rail.segment1, rail.segment2, post);
 						// TODO
 						if (!dist.is_valid() || dist.get() > 1.13 + 1) {
@@ -89,10 +89,7 @@ namespace billiards::shots {
 				}
 			}
 
-			previous_ghosts.clear();
-			for (const auto& cur : current_posts->posts()) {
-				previous_ghosts.emplace_back(cur.point());
-			}
+			previous_ghosts = current_posts;
 		}
 //			for (const auto& step : shot.steps) {
 //				switch (step->type) {
