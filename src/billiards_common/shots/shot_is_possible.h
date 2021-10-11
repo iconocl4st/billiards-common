@@ -36,9 +36,15 @@ namespace billiards::shots {
 //				}
 
 			for (int j = 0; j < 3; j++) {
+				if (!previous_ghosts || !current_posts || !next_posts) {
+					return false;
+				}
 				const auto& prev = previous_ghosts->posts[j];
 				const auto& cur = current_posts->posts[j];
 				const auto& next = next_posts->posts[j];
+				if (!prev.is_valid() || !cur.is_valid() || !next.is_valid()) {
+					return false;
+				}
 
 				const auto dir1 = cur - prev;
 				const auto dir2 = next - cur;
@@ -63,6 +69,7 @@ namespace billiards::shots {
 					case step_type::POCKET:
 					case step_type::KISS:
 						// TODO: Implement me
+						break;
 					case step_type::UNKNOWN:
 						return false;
 				}
