@@ -108,7 +108,7 @@ namespace billiards::shots {
 			if (d_same_direction < 0) {
 				return false;
 			}
-			const double a_same_direction = x * (ax - x) + y * (ay - y);
+			const double a_same_direction = x * (aim_x - x) + y * (aim_y - y);
 //			std::cout << "a same direction: " << a_same_direction << std::endl;
 			if (a_same_direction < 0) {
 				return false;
