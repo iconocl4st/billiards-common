@@ -57,19 +57,15 @@ namespace algebra::poly {
 
 	class F4State {
 	public:
-		std::vector<PolyDict> polys;
+		std::vector<PolyDict>& polys;
 		std::map<Pair, int> degrees;
 		std::set<Pair> queue;
 
-		explicit F4State(std::vector<PolyDict>& polynomials)
-			: polys{}
+		explicit F4State(std::vector<PolyDict>& polynomials, std::vector<PolyDict>& basis)
+			: polys{basis}
 			, degrees{}
 			, queue{}
-		{
-			for (const PolyDict& poly : polynomials) {
-				add_polynomial(poly.to_monic());
-			}
-		}
+		{}
 
 		void add_polynomial(const PolyDict& poly) {
 			int poly_index = (int) polys.size();
@@ -138,11 +134,12 @@ namespace algebra::poly {
 			const auto& fi = state.polys[pair.idx1];
 			const auto& fj = state.polys[pair.idx2];
 			sygyzys.push_back(fi * (fi.leading().lcm(fj.leading()) / fi.leading()));
+			sygyzys.push_back(fj * (fj.leading().lcm(fi.leading()) / fj.leading()));
 		}
 	}
 
 	inline
-	void construct_H(std::vector<PolyDict>& sygyzys, std::set<MultiIndex>& terms) {
+	void construct_H(F4State& state, std::vector<PolyDict>& sygyzys, std::set<MultiIndex>& terms) {
 		collect_terms(sygyzys, terms);
 		std::set<MultiIndex> done;
 		for (const auto& poly : sygyzys) {
@@ -173,16 +170,16 @@ namespace algebra::poly {
 			done.insert(maxi);
 			std::cout << "constructing h: found maximum degree: " << maxi << std::endl;
 
-			for (int i = 0; i < (int) sygyzys.size(); i++) {
-				const auto& leading = sygyzys[i].leading();
+			for (const PolyDict& fl : state.polys) {
+				const auto& leading = fl.leading();
 				if (!leading.divides(maxi)) {
 					continue;
 				}
-				const PolyDict h = sygyzys[i] * (maxi / leading);
+				const PolyDict h = fl * (maxi / leading);
 				sygyzys.push_back(h);
 				collect_terms(h, terms);
 
-				std::cout << "constructing h: found polynomial f_l = " << sygyzys[i] << std::endl;
+				std::cout << "constructing h: found polynomial f_l = " << fl << std::endl;
 				std::cout << "constructing h: Computed h = " << h << std::endl;
 				break;
 			}
@@ -216,7 +213,7 @@ namespace algebra::poly {
 	int get_pivot_row(Eigen::MatrixXd& M, int r, int c) {
 		int max_r = r;
 		for (int i = r + 1; i < M.rows(); i++) {
-			if (std::abs(M(i, c)) > std::abs(M(i, c))) {
+			if (std::abs(M(i, c)) > std::abs(M(max_r, c))) {
 				max_r = i;
 			}
 		}
@@ -236,7 +233,10 @@ namespace algebra::poly {
 
 	void eliminate(Eigen::MatrixXd& M, int r, int c) {
 		M.row(r) /= M(r, c);
-		for (int i = r + 1; i < M.rows(); i++) {
+		for (int i = 0; i < M.rows(); i++) {
+			if (i == r) {
+				continue;
+			}
 			M.row(i) -= M(i, c) * M.row(r);
 		}
 	}
@@ -273,18 +273,54 @@ namespace algebra::poly {
 	PolyDict get_poly(std::set<MultiIndex>& terms, Eigen::MatrixXd& M, int index) {
 		int col = 0;
 		PolyDict p{terms.begin()->ideal};
-		for (const auto& m : terms) {
+		for (auto tit = terms.rbegin(); tit != terms.rend(); ++tit) {
 			double c = M(index, col++);
 			if (std::abs(c) < YET_ANOTHER_TOL) {
 				continue;
 			}
-			p.terms.emplace(m, c);
+			p.terms.emplace(*tit, c);
 		}
 		return p/*.to_monic()*/;
 	}
 
-	void f4(std::vector<PolyDict> polys) {
-		F4State state{polys};
+	bool leading_is_generated_by(const MultiIndex& leading, std::vector<MultiIndex>& indices, int index) {
+		if (leading.is_constant()) {
+			return true;
+		}
+		if (index >= (int) indices.size()) {
+			return false;
+		}
+		MultiIndex r = leading;
+		while (true) {
+			if (leading_is_generated_by(r, indices, index + 1)) {
+				return true;
+			}
+			if (!indices[index].divides(r)) {
+				return false;
+			}
+			r = r / indices[index];
+		}
+	}
+
+	bool leading_is_generated_by(const PolyDict& poly, std::vector<PolyDict>& sygyzys) {
+		std::set<MultiIndex> lms; // Is this already calculated?
+		for (const auto& p : sygyzys) {
+			lms.insert(p.leading());
+		}
+		std::cout << "leading(H):" << std::endl;
+		for (const auto& p : lms) {
+			std::cout << "\t" << p << std::endl;
+		}
+		std::vector<MultiIndex> lmv{lms.begin(), lms.end()};
+
+		return leading_is_generated_by(poly.leading(), lmv, 0);
+	}
+
+	void f4(std::vector<PolyDict> polys, std::vector<PolyDict>& basis) {
+		F4State state{polys, basis};
+		for (const PolyDict& poly : polys) {
+			state.add_polynomial(poly.to_monic());
+		}
 
 		int count = 0;
 		while (!state.queue.empty() && count++ < 3) {
@@ -302,23 +338,23 @@ namespace algebra::poly {
 
 			std::vector<PolyDict> sygyzys;
 			construct_sygyzys(state, B, sygyzys);
+			std::cout << "Constructed sygyzys:" << std::endl;
+			for (const auto& s : sygyzys) {
+				std::cout << "\t" << s << std::endl;
+			}
 
 			std::set<MultiIndex> terms;
-			construct_H(sygyzys, terms);
-
+			construct_H(state, sygyzys, terms);
 			std::cout << "Computed H:" << std::endl;
 			for (const auto& p : sygyzys) {
 				std::cout << "\t" << p << std::endl;
 			}
 
-			std::set<MultiIndex> lm; // Is this already calculated?
-			for (const auto& p : sygyzys) {
-				lm.insert(p.leading());
+			std::cout << "terms: ";
+			for (const auto& t : terms) {
+				std::cout << t << " ";
 			}
-			std::cout << "leading(H):" << std::endl;
-			for (const auto& p : lm) {
-				std::cout << "\t" << p << std::endl;
-			}
+			std::cout << std::endl;
 
 			Eigen::MatrixXd M{sygyzys.size(), terms.size()};
 			write_to_matrix(terms, sygyzys, M);
@@ -338,21 +374,10 @@ namespace algebra::poly {
 					std::cout << "\t\t...is zero" << std::endl;
 					continue;
 				}
-				bool in_nplus = true;
-				const auto& leading = poly.leading();
-				for (const auto& l : lm) {
-					if (l.divides(leading)) {
-						std::cout << "\t\t...leading is divisible by " << l << std::endl;
-						in_nplus = false;
-						break;
-					}
-				}
-				if (!in_nplus) {
+				if (leading_is_generated_by(poly, sygyzys)) {
+					std::cout << "\t\t..." << poly.leading() << " is generated" << std::endl;
 					continue;
 				}
-//				if (in_nplus(state, poly, terms, M, i)) {
-//					continue;
-//				}
 				std::cout << "\t\t...adding." << std::endl;
 				state.add_polynomial(poly);
 			}

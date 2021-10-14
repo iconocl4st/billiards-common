@@ -221,7 +221,7 @@ namespace algebra::poly {
 		friend std::ostream& operator<<(std::ostream& os, const MultiIndex& m) {
 //			os << "(" << m.powers << ") ";
 			if (m.is_constant()) {
-				return os;
+				return os << "1";
 			}
 
 			bool requires_multiplication = false;
