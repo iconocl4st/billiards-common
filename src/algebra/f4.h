@@ -243,6 +243,7 @@ namespace algebra::poly {
 
 	void reduce(Eigen::MatrixXd& M) {
 		// Use eigen's permutation matrix...
+		// TODO: Don't actually need to keep the pivots
 		std::vector<int> pivots;
 		for (int i = 0; i < M.rows(); i++) {
 			pivots.push_back(i);
@@ -357,6 +358,7 @@ namespace algebra::poly {
 			std::cout << std::endl;
 
 			Eigen::MatrixXd M{sygyzys.size(), terms.size()};
+//			Eigen::MatrixXd M = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>{sygyzys.size(), terms.size()};
 			write_to_matrix(terms, sygyzys, M);
 
 			std::cout << "Computed M:" << std::endl;
