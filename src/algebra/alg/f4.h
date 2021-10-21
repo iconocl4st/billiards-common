@@ -12,7 +12,7 @@
 
 #include <Eigen/Dense>
 
-#include "GmpPoly.h"
+#include "algebra/PolyDict.h"
 
 namespace algebra::poly {
 
@@ -44,12 +44,12 @@ namespace algebra::poly {
 		}
 	};
 
-	void collect_terms(const PolyDict& poly, std::set<MultiIndex>& terms) {
+	void collect_terms(const PolyDict& poly, std::set<IndexPtr>& terms) {
 		for (const auto& term : poly.terms) {
 			terms.insert(term.first);
 		}
 	}
-	void collect_terms(std::vector<PolyDict>& polys, std::set<MultiIndex>& terms) {
+	void collect_terms(std::vector<PolyDict>& polys, std::set<IndexPtr>& terms) {
 		for (const auto& poly : polys) {
 			collect_terms(poly, terms);
 		}

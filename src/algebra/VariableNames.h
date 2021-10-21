@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "algebra/Polynomial.h"
+#include "algebra/vec/PolyVec.h"
 
 namespace algebra::poly {
 
@@ -45,12 +45,12 @@ namespace algebra::poly {
 		}
 
 		[[nodiscard]] inline
-		Polynomial operator()(const std::string& name) const {
+		PolyVec operator()(const std::string& name) const {
 			int index = get_var(name);
 			Monomial m{dim()};
 			m.coefficient = 1.0;
 			m.powers[index] = 1;
-			Polynomial p{dim()};
+			PolyVec p{dim()};
 			p += m;
 			return p;
 		}
@@ -62,7 +62,7 @@ namespace algebra::poly {
 		}
 
 		[[nodiscard]] inline
-		PolynomialWithFormatter operator()(const Polynomial& p) const {
+		PolynomialWithFormatter operator()(const PolyVec& p) const {
 			return PolynomialWithFormatter{p, create_formatter()};
 		}
 

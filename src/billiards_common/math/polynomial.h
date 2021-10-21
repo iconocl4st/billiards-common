@@ -2,10 +2,10 @@
 // Created by thallock on 10/3/21.
 //
 
-#ifndef IDEA_POLYNOMIAL_H
-#define IDEA_POLYNOMIAL_H
+#ifndef IDEA_POLYS_H
+#define IDEA_POLYS_H
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <functional>
 #include <iostream>
@@ -297,4 +297,4 @@ eq = expand(c0 + c1 * y + c2 * y^2 + y^3).collect(x)
 	}
 }
 
-#endif //IDEA_POLYNOMIAL_H
+#endif //IDEA_POLYVEC_H

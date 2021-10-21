@@ -5,24 +5,69 @@
 #ifndef IDEA_INDEX_H
 #define IDEA_INDEX_H
 
-namespace algebra::poly {
-#define POLY_TOL (1e-10)
+#include "algebra/Ideal.h"
 
-	// template <class elem_type>
+#include <memory>
+#include <utility>
+
+namespace algebra::poly {
+
 	class MultiIndex {
 	public:
-		const std::vector<int> powers;
+		const std::shared_ptr<Ideal>& ideal;
 
-		MultiIndex(const std::vector<int>& powers)
-			: powers(powers)
-		{}
+		explicit MultiIndex(const std::shared_ptr<Ideal>& ideal) : ideal{ideal} {};
 
-		MultiIndex(int n)
-			: powers{}
-		{
-			for (int i = 0; i < n; i++) {
-				powers.push_back(0);
+		virtual ~MultiIndex() = default;
+
+		[[nodiscard]] virtual int get(int var_index) const = 0;
+
+		virtual void set(int var_index, int power) = 0;
+
+		[[nodiscard]] virtual std::shared_ptr<MultiIndex> copy() const = 0;
+
+		[[nodiscard]] virtual std::shared_ptr<MultiIndex> empty() const = 0;
+
+		[[nodiscard]] virtual bool is_constant() const { return degree() == 0; }
+
+		inline
+		virtual bool operator==(const MultiIndex& other) const {
+			if (dim() != other.dim()) {
+				throw std::runtime_error{"Cannot compare monomials in different dimension"};
 			}
+			for (int i = 0; i < dim(); i++) {
+				if (get(i) != other.get(i)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		[[nodiscard]] inline
+		virtual std::shared_ptr<MultiIndex> mult(const std::shared_ptr<MultiIndex>& other) const {
+			if (dim() != other->dim()) {
+				throw std::runtime_error{"Cannot add indices in different dimension"};
+			}
+			auto ret = empty();
+			for (int i = 0; i < dim(); i++) {
+				ret->set(i, get(i) + other->get(i));
+			}
+			return ret;
+		}
+
+		[[nodiscard]] inline
+		virtual std::shared_ptr<MultiIndex> div(const std::shared_ptr<MultiIndex>& other) const {
+			if (dim() != other->dim()) {
+				throw std::runtime_error{"Cannot divide indices in different dimension"};
+			}
+			if (!is_divisible_by(other)) {
+				throw std::runtime_error{"Not divisible"};
+			}
+			auto ret = empty();
+			for (int i = 0; i < dim(); i++) {
+				ret->set(i, get(i) - other->get(i));
+			}
+			return ret;
 		}
 
 		[[nodiscard]] inline
@@ -32,26 +77,27 @@ namespace algebra::poly {
 			}
 			double value = 1.0;
 			for (int i = 0; i < dim(); i++) {
-				if (powers[i] == 0) {
+				int power = get(i);
+				if (power == 0) {
 					continue;
 				}
-				value *= std::pow(x[i], powers[i]);
+				value *= std::pow(x[i], power);
 			}
 			return value;
 		}
 
 		[[nodiscard]] inline
 		int dim() const {
-			return (int) powers.size();
+			return (int) ideal->dim();
 		}
 
 		[[nodiscard]] inline
-		bool divides(const MultiIndex& other) const {
-			if (dim() != other.dim()) {
+		bool divides(const std::shared_ptr<MultiIndex>& other) const {
+			if (dim() != other->dim()) {
 				throw std::runtime_error{"Cannot check divisibility of multi index in different dimension"};
 			}
-			for (int i = 0; i < powers.size(); i++) {
-				if (powers[i] > other.powers[i]) {
+			for (int i = 0; i < dim(); i++) {
+				if (get(i) > other->get(i)) {
 					return false;
 				}
 			}
@@ -59,206 +105,141 @@ namespace algebra::poly {
 		}
 
 		[[nodiscard]] inline
-		MultiIndex lcm(const MultiIndex& other) const {
-			if (dim() != other.dim()) {
+		bool is_divisible_by(const std::shared_ptr<MultiIndex>& other) const {
+			if (dim() != other->dim()) {
+				throw std::runtime_error{"Cannot check divisibility of multi index in different dimension"};
+			}
+			for (int i = 0; i < dim(); i++) {
+				if (get(i) < other->get(i)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		[[nodiscard]] inline
+		std::shared_ptr<MultiIndex> lcm(const std::shared_ptr<MultiIndex>& other) const {
+			if (dim() != other->dim()) {
 				throw std::runtime_error{"Cannot compute lcm in different dimensions"};
 			}
-			std::vector<int> maxes;
-			for (int i = 0; i < (int) powers.size(); i++) {
-				maxes.push_back(std::max(powers[i], other.powers[i]));
+			auto maxes = empty();
+			for (int i = 0; i < dim(); i++) {
+				maxes->set(i, std::max(get(i), other->get(i)));
 			}
-			return MultiIndex{maxes};
-		}
-
-		[[nodiscard]] inline
-		bool is_divisible_by(const MultiIndex& other) const {
-			return other.divides(*this);
-		}
-
-		[[nodiscard]] inline
-		int degree(int idx) const {
-//			if (idx < 0 || idx >= powers.size()) {
-//				throw std::runtime_error{};
-//			}
-			return powers[idx];
+			return maxes;
 		}
 
 		[[nodiscard]] inline
 		int degree() const {
 			int sum = 0;
-			for (int power : powers) {
-				sum += power;
+			for (int i = 0; i < dim(); i++) {
+				sum += get(i);
 			}
 			return sum;
 		}
 
 		inline
-		bool operator==(const Monomial& other) const {
-			if (dim() != other.dim()) {
-				throw std::runtime_error{"Cannot compare monomials in different dimension"};
+		friend std::ostream& operator<<(std::ostream& os, const MultiIndex& m) {
+			if (m.is_constant()) {
+				return os << "1";
 			}
-			for (int i = 0; i < powers.size(); i++) {
-				if (powers[i] != other.powers[i]) {
-					return false;
-				}
-			}
-			if (std::abs(coefficient - other.coefficient) >= POLY_TOL) {
-				return false;
-			}
-			return true;
-		}
-		inline
-		bool operator<(const Monomial& other) const {
-			if (dim() != other.dim()) {
-				throw std::runtime_error{"Cannot compare monomials in different dimension"};
-			}
-			for (int i = 0; i < powers.size(); i++) {
-				if (powers[i] < other.powers[i]) {
-					return true;
-				}
-				if (powers[i] > other.powers[i]) {
-					return false;
-				}
-			}
-			if (coefficient < other.coefficient) {
-				return true;
-			}
-			if (coefficient > other.coefficient) {
-				return false;
-			}
-			return false;
-		}
 
-		inline bool operator<=(const Monomial& other) const {
-			return operator==(other) || operator<(other);
-		}
-		inline bool operator>(const Monomial& other) const {
-			return !(operator==(other)) && !(operator<(other));
-		}
-		inline bool operator>=(const Monomial& other) const {
-			return operator==(other) || !(operator<(other));
-		}
-
-		inline
-		std::ostream& write(std::ostream& os, const Formatter& f) const {
-			const bool has_coeff = std::abs(coefficient - 1) > POLY_TOL;
-			const bool deg_0 = degree() == 0;
-			if (has_coeff) {
-				os.precision(std::numeric_limits<double>::max_digits10 - 1);
-				os << coefficient;
-			}
-			if (deg_0) {
-				if (has_coeff) {
-					return os;
-				} else {
-					return os << 1;
-				}
-			}
-			bool requires_multiplication = has_coeff;
-			for (int i = 0; i < powers.size(); i++) {
-				if (powers[i] == 0) {
+			bool requires_multiplication = false;
+			for (int i = 0; i < m.ideal->dim(); i++) {
+				const int p = m.get(i);
+				if (p == 0) {
 					continue;
 				}
 				if (requires_multiplication) {
-					os << " * ";
+					os << "*";
 				} else {
 					requires_multiplication = true;
 				}
-				os << f(i);
-				if (powers[i] != 1) {
-					os << "^" << powers[i];
+				os << m.ideal->name(i);
+				if (p != 1) {
+					os << "^" << p;
 				}
 			}
 			return os;
 		}
 
-		inline
-		friend std::ostream& operator<<(std::ostream& os, const Monomial& m) {
-			auto def_formatter = default_formatter();
-			return m.write(os, def_formatter);
-		}
+//		[[nodiscard]] inline
+//		std::string powers_key() const {
+//			std::stringstream s;
+//			bool requires_comma = false;
+//			for (int i = 0; i < dim(); i++) {
+//				if (requires_comma) {
+//					s << ",";
+//				} else {
+//					requires_comma = true;
+//				}
+//				s << get(i);
+//			}
+//			return s.str();
+//		}
+	};
 
-		[[nodiscard]] inline
-		Monomial operator-() const {
-			return Monomial{-coefficient, powers};
-		}
 
-		[[nodiscard]] inline
-		Monomial operator*(const Monomial& other) const {
-			if (dim() != other.dim()) {
-				throw std::runtime_error{"Cannot add polynomials in different dimension"};
-			}
-			Monomial ret{coefficient * other.coefficient, dim()};
-			for (int i = 0; i < powers.size(); i++) {
-				ret.powers[i] = powers[i] + other.powers[i];
-			}
-			return ret;
-		}
+	typedef std::shared_ptr<MultiIndex> IndexPtr;
 
-		[[nodiscard]] inline
-		Monomial operator*(const double v) const {
-			return Monomial{coefficient * v, powers};
+	[[nodiscard]] inline
+	bool lex_less(const IndexPtr& idx1, const IndexPtr& idx2) {
+		if (idx1->dim() != idx2->dim()) {
+			throw std::runtime_error{"Cannot compare monomials in different dimension"};
 		}
-
-		[[nodiscard]] inline
-		Monomial operator/(const double v) const {
-			if (std::abs(v) < POLY_TOL) {
-				throw std::runtime_error{"Division by zero"};
+		for (int i = 0; i < idx1->dim(); i++) {
+			int p1 = idx1->get(i);
+			int p2 = idx2->get(i);
+			if (p1 < p2) {
+				return true;
 			}
-			return Monomial{coefficient / v, powers};
+			if (p1 > p2) {
+				return false;
+			}
 		}
+		return false;
+	}
 
-		[[nodiscard]] inline
-		Monomial operator/(const Monomial& other) const {
-			if (dim() != other.dim()) {
-				throw std::runtime_error{"Cannot divide polynomials in different dimension"};
-			}
-			if (!is_divisible_by(other)) {
-				throw std::runtime_error{"Not divisible"};
-			}
-			Monomial ret{coefficient / other.coefficient, dim()};
-			for (int i = 0; i < powers.size(); i++) {
-				ret.powers[i] = powers[i] - other.powers[i];
-			}
-			return ret;
+	[[nodiscard]] inline
+	bool graded_lex_less(const IndexPtr& idx1, const IndexPtr& idx2) {
+		if (idx1->dim() != idx2->dim()) {
+			throw std::runtime_error{"Cannot compare monomials in different dimension"};
 		}
-
-		[[nodiscard]] inline
-		bool powers_match(const Monomial& other) const {
-			if (dim() != other.dim()) {
-				throw std::runtime_error{"Cannot compare monomials in different dimension"};
-			}
-			for (int i = 0; i < powers.size(); i++) {
-				if (powers[i] != other.powers[i]) {
-					return false;
-				}
-			}
+		int total_degree1 = idx1->degree();
+		int total_degree2 = idx2->degree();
+		if (total_degree1 < total_degree2) {
 			return true;
 		}
-
-		inline
-		Monomial& operator+=(const Monomial& other) {
-			if (!powers_match(other)) {
-				throw std::runtime_error{"Cannot add monomials in different dimension"};
-			}
-			coefficient += other.coefficient;
-			return *this;
+		if (total_degree1 > total_degree2) {
+			return false;
 		}
+		return lex_less(idx1, idx2);
+	}
 
-		[[nodiscard]] inline
-		std::string powers_key() const {
-			std::stringstream s;
-			bool requires_comma = false;
-			for (const int& p : powers) {
-				if (requires_comma) {
-					s << ",";
-				} else {
-					requires_comma = true;
-				}
-				s << p;
-			}
-			return s.str();
+	[[nodiscard]] inline
+	bool graded_reverse_lex_less(const IndexPtr& idx1, const IndexPtr& idx2) {
+		if (idx1->dim() != idx2->dim()) {
+			throw std::runtime_error{"Cannot compare monomials in different dimension"};
 		}
-	};
+		int total_degree1 = idx1->degree();
+		int total_degree2 = idx2->degree();
+		if (total_degree1 < total_degree2) {
+			return true;
+		}
+		if (total_degree1 > total_degree2) {
+			return false;
+		}
+		for (int i = idx1->dim() - 1; i >= 0; i--) {
+			int p1 = idx1->get(i);
+			int p2 = idx2->get(i);
+			if (p1 < p2) {
+				return true;
+			}
+			if (p2 > p1) {
+				return false;
+			}
+		}
+		return false;
+	}
 }
 #endif //IDEA_INDEX_H

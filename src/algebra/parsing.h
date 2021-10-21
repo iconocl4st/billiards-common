@@ -5,14 +5,16 @@
 #ifndef IDEA_PARSING_H
 #define IDEA_PARSING_H
 
-
 #include <regex>
 
-#include "algebra/Polynomial.h"
+#include "MultiIndexImpl.h"
+#include "PolyDict.h"
 
 namespace algebra::poly::parsing {
 
-	void parse_powers(std::string& str, Monomial& m) {
+	// TODO: combine this...
+	inline
+	void parse_powers(std::string& str, const std::shared_ptr<MultiIndex>& m) {
 		std::stringstream s;
 		std::regex_token_iterator<std::string::iterator> rend;
 
@@ -35,14 +37,15 @@ namespace algebra::poly::parsing {
 			}
 
 			int index = std::stoi(index_s);
-			if (index < 0 || index >= m.dim()) {
+			if (index < 0 || index >= m->dim()) {
 				throw std::runtime_error{"Invalid variable"};
 			}
-			m.powers[index] = power;
+			m->set(index, power);
 		}
 	}
 
-	Monomial parse_monomial(std::string& str, int dim) {
+	[[nodiscard]] inline
+	std::optional<Monomial> parse_monomial(const std::shared_ptr<IndexImpl>& impl, std::string& str) {
 		std::stringstream s;
 		std::regex_token_iterator<std::string::iterator> rend;
 
@@ -54,7 +57,7 @@ namespace algebra::poly::parsing {
 			str.begin(), str.end(), expr, submatches};
 
 		if (it == rend) {
-			return Monomial{dim};
+			return {};
 		}
 		std::string coefficient = *it++;
 		std::string powers = *it++;
@@ -62,20 +65,18 @@ namespace algebra::poly::parsing {
 //		std::cout << "\tFound coefficient: " << coefficient << std::endl;
 //		std::cout << "\tFound powers: " << powers << std::endl;
 
-		Monomial m{dim};
-		if (coefficient.empty()) {
-			m.coefficient = 1.0;
-		} else {
-			m.coefficient = std::stod(coefficient);
-		}
+		Monomial m{impl->create_empty(), coefficient.empty() ? 1.0 : std::stod(coefficient)};
 		if (!powers.empty()) {
-			parse_powers(powers, m);
+			parse_powers(powers, m.first);
 		}
 		return m;
 	}
 
-	Polynomial parse_polynomial(std::string& str, int dim) {
-		Polynomial p{dim};
+	[[nodiscard]] inline
+	PolyPtr parse_polynomial(const std::shared_ptr<IndexImpl>& impl, const std::string& const_str) {
+		std::string str{const_str};
+		PolyPtr p = std::make_shared<PolyDict>(impl);
+
 		std::stringstream s;
 		std::regex_token_iterator<std::string::iterator> rend;
 
@@ -90,11 +91,14 @@ namespace algebra::poly::parsing {
 //			std::cout << "Found sign: " << sign << std::endl;
 //			std::cout << "Found term: " << term << std::endl;
 
-			Monomial m = parse_monomial(term, dim);
-			if (sign == "-") {
-				m.coefficient *= -1;
+			auto m = parse_monomial(impl, term);
+			if (!m) {
+				continue;
 			}
-			p += m;
+			if (sign == "-") {
+				m->second *= -1;
+			}
+			p->operator+=(m.value());
 		}
 		return p;
 	}

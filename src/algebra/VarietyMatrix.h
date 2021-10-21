@@ -5,8 +5,8 @@
 #ifndef IDEA_VARIETYMATRIX_H
 #define IDEA_VARIETYMATRIX_H
 
-#include "algebra/Polynomial.h"
-#include "algebra/Formatter.h"
+#include "algebra/vec/PolyVec.h"
+#include "algebra/vec/Formatter.h"
 #include <Eigen/Dense>
 
 namespace algebra::poly {
@@ -40,7 +40,7 @@ namespace algebra::poly {
 		}
 
 		inline
-		int count_columns(std::vector<std::vector<int>>& mapping, const std::vector<const Polynomial*>& polynomials) {
+		int count_columns(std::vector<std::vector<int>>& mapping, const std::vector<const PolyVec*>& polynomials) {
 			for (const auto& poly : polynomials) {
 				for (const auto& term : poly->terms) {
 					variety_matrix::ensure_col(mapping, term.powers);
@@ -57,7 +57,7 @@ namespace algebra::poly {
 		int ncols;
 		Eigen::MatrixXd coefficients;
 
-		explicit VarietyMatrix(const std::vector<const Polynomial*>& polynomials)
+		explicit VarietyMatrix(const std::vector<const PolyVec*>& polynomials)
 			: mapping{}
 			, nrows{(int) polynomials.size()}
 			, ncols{variety_matrix::count_columns(mapping, polynomials)}
