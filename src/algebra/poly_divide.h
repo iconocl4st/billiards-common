@@ -37,8 +37,8 @@ namespace algebra::poly {
 
 		[[nodiscard]] inline
 		bool check() const {
-			std::cout << "Need: \n";
-			std::cout << dividend << " = " << remainder << "\n";
+//			std::cout << "Need: \n";
+//			std::cout << dividend << " = " << remainder << "\n";
 			for (int i = 0; i < ndiv; i++) {
 				if (quotients[i]->is_zero()) {
 					continue;

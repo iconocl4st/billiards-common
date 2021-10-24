@@ -22,10 +22,7 @@ namespace algebra::poly {
 	class PolyDict {
 	public:
 		const std::shared_ptr<IndexImpl>& index_impl;
-		std::map<
-		    std::shared_ptr<MultiIndex>,
-			double,
-			std::function<bool(const IndexPtr&, const IndexPtr&)>> terms;
+		std::map<std::shared_ptr<MultiIndex>, double, MonomialOrder> terms;
 
 		explicit PolyDict(const std::shared_ptr<IndexImpl>& ii)
 			: index_impl{ii}
@@ -36,10 +33,7 @@ namespace algebra::poly {
 
 		PolyDict(
 			const std::shared_ptr<IndexImpl>& ii,
-			std::map<
-			    std::shared_ptr<MultiIndex>,
-				double,
-				std::function<bool(const IndexPtr&, const IndexPtr&)>> terms)
+			std::map<std::shared_ptr<MultiIndex>, double, MonomialOrder> terms)
 			: index_impl{ii}
 			, terms{std::move(terms)}
 		{
@@ -95,6 +89,18 @@ namespace algebra::poly {
 				auto rest = term.first->copy();
 				rest->set(index, 0);
 				p->operator+=(value->pow(old_power)->operator*(Monomial{rest, term.second}));
+			}
+			return p;
+		}
+
+		[[nodiscard]] inline
+		std::shared_ptr<PolyDict> div_out(const IndexPtr& multi_index) const {
+			auto p = empty();
+			for (const auto& term: terms) {
+				if (!multi_index->divides(term.first)) {
+					throw std::runtime_error{"Not divisible"};
+				}
+				p->operator+=(Monomial{term.first->div(multi_index), term.second});
 			}
 			return p;
 		}
@@ -360,6 +366,52 @@ namespace algebra::poly {
 			return p;
 		}
 
+		[[nodiscard]] inline
+		PolyPtr variable(const std::shared_ptr<IndexImpl>& impl, const std::string& name) {
+			auto var = impl->create_empty();
+			var->set(impl->ideal->get_var_index(name), 1);
+
+			PolyPtr p = std::make_shared<PolyDict>(impl);
+			p->operator+=(Monomial(var, 1.0));
+			return p;
+		}
+
+		inline
+		void print_present_vars(std::ostream& os, const PolyPtr& poly, int index) {
+			const auto& ideal = poly->index_impl->ideal;
+			std::map<std::string, int> names;
+			for (int var_idx = 0; var_idx < ideal->dim(); var_idx++) {
+				int max = 0;
+				for (const auto& term: poly->terms) {
+					max = std::max(max, term.first->get(var_idx));
+				}
+				if (max == 0) {
+					continue;
+				}
+				names[ideal->name(var_idx)] = max;
+			}
+			os << "\t" << index << ": ";
+			bool requires_comma = false;
+			for (const auto& s : names) {
+				if (requires_comma) {
+					os << ", ";
+				} else {
+					requires_comma = true;
+				}
+				os << s.first << " (" << s.second << ")";
+			}
+			os << "\n";
+		}
+
+		inline
+		void print_present_vars(std::vector<PolyPtr>& polys) {
+			std::cout << "Variables present:" << std::endl;
+			for (int i = 0; i < (int) polys.size(); i++) {
+				print_present_vars(std::cout, polys[i], i);
+			}
+			std::cout << std::endl;
+		}
+
 //		[[nodiscard]] inline
 //		PolyPtr monomial(const IndexPtr& impl, double value) {
 //			PolyPtr p = std::make_shared<PolyDict>(impl);
@@ -376,11 +428,46 @@ namespace algebra::poly {
 				return {};
 			}
 			for (const auto& term : poly->terms) {
-				if (term.first->get(var_index) > 1) {
+				if (term.first->get(var_index) >= 1 && term.first->degree() > 1) {
 					return {};
 				}
 			}
 			return poly->without(loc->first)->operator/(-loc->second);
+		}
+
+		class LinearSubstitution {
+		public:
+			bool success;
+			PolyPtr numerator;
+			PolyPtr denominator;
+
+			LinearSubstitution(const PolyPtr& orig)
+				: success{true},
+				, numerator{orig->empty()}
+				, denominator{orig->empty()}
+			{}
+
+			virtual ~LinearSubstitution() = default;
+		};
+
+		[[nodiscard]] inline
+		std::shared_ptr<LinearSubstitution> get_linear_assignment(const PolyPtr& poly, int var_index) {
+			auto ret = std::make_shared<LinearSubstitution>(poly);
+			for (const auto& term : poly->terms) {
+				int pow = term.first->get(var_index);
+
+				auto rest = Monomial{term.first->copy(), term.second};
+				rest.first->set(var_index, 0);
+
+				if (pow == 0) {
+					ret->numerator->operator-=(rest);
+				} else if (pow == 1) {
+					ret->denominator->operator+=(rest);
+				} else {
+					ret->success = false;
+				}
+			}
+			return ret;
 		}
 
 //		[[nodiscard]] inline

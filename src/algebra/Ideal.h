@@ -32,7 +32,7 @@ namespace algebra::poly {
 		}
 
 		friend std::ostream& operator<<(std::ostream& os, const Ideal& ideal) {
-			os << "Ideal with " << ideal.names.size() << " variables:\n\t";
+			os << "\t\tIdeal with " << ideal.names.size() << " variables:\n";
 			bool requires_comma = false;
 			for (const auto& name : ideal.names) {
 				if (requires_comma) {

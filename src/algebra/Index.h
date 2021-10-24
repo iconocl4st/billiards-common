@@ -233,10 +233,10 @@ namespace algebra::poly {
 			int p1 = idx1->get(i);
 			int p2 = idx2->get(i);
 			if (p1 < p2) {
-				return true;
-			}
-			if (p2 > p1) {
 				return false;
+			}
+			if (p1 > p2) {
+				return true;
 			}
 		}
 		return false;

@@ -11,20 +11,9 @@
 #include "algebra/poly_divide.h"
 #include "algebra/alg/Pair.h"
 #include "algebra/alg/reduce_grobner.h"
+#include "algebra/alg/check_grobner.h"
 
 namespace algebra::poly {
-
-	[[nodiscard]] inline
-	PolyPtr construct_s(const PolyPtr& p1, const PolyPtr& p2) {
-		auto ld1 = p1->leading();
-		auto ld2 = p2->leading();
-		IndexPtr lcm = ld1.first->lcm(ld2.first);
-		PolyPtr s = (p1 * Monomial(lcm->div(ld1.first), ld2.second)) - (p2 * Monomial(lcm->div(ld2.first), ld1.second));
-		std::cout << "lcm(" << ld1 << ", " << ld2 << ") = " << *lcm << std::endl;
-		std::cout << "Computed S(" << p1 << ", " << p2 << ") = " << s << std::endl;
-		return s;
-	}
-
 
 	inline
 	void add_all_less(std::list<Pair>& queue, int index) {

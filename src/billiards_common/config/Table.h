@@ -126,8 +126,8 @@ namespace billiards::config {
 			}
 		}
 
-		[[nodiscard]] inline
-		bool is_incident(int pocket_index, int rail_index) const {
+		[[nodiscard]] static inline
+		bool is_incident(int pocket_index, int rail_index) {
 			switch (pocket_index) {
 				case constants::RIGHT_LOWER_POCKET:
 					return rail_index == constants::RIGHT_RAIL
@@ -160,7 +160,8 @@ namespace billiards::config {
 			return pockets[pocket_index];
 		}
 
-		void to_json(json::SaxWriter& writer) const {
+		inline
+		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
 			writer.key("balls");
 			writer.begin_array();
@@ -179,7 +180,8 @@ namespace billiards::config {
 			writer.end_object();
 		};
 
-		void parse(const nlohmann::json& value, json::ParseResult& status) {
+		inline
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
 			ENSURE_ARRAY(status, value, "balls", "table must have balls");
 			// value["balls"].size() == balls.size()
 			auto num_balls = balls.size();

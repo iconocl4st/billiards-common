@@ -26,6 +26,7 @@ namespace algebra::poly {
 			: MultiIndex(ideal)
 			, powers{/*ideal->dim(), 0*/}
 		{
+			powers.reserve(ideal->dim());
 			for (int i = 0; i < ideal->dim(); i++) {
 				powers.push_back(0);
 			}

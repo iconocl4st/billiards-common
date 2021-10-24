@@ -12,6 +12,8 @@
 
 namespace algebra::poly {
 
+	typedef std::function<bool(const IndexPtr&, const IndexPtr&)> MonomialOrder;
+
 	class IndexImpl {
 	public:
 		std::shared_ptr<Ideal> ideal;
@@ -34,7 +36,7 @@ namespace algebra::poly {
 		};
 
 		[[nodiscard]] inline
-		std::function<bool(const IndexPtr&, const IndexPtr&)> get_comparator() const override {
+		MonomialOrder get_comparator() const override {
 			switch (ideal->order) {
 				case cmp::Lexical:
 					return lex_less;
@@ -59,7 +61,7 @@ namespace algebra::poly {
 			return std::dynamic_pointer_cast<MultiIndex>(ret);
 		};
 
-		[[nodiscard]] std::function<bool(const IndexPtr&, const IndexPtr&)> get_comparator() const override {
+		[[nodiscard]] MonomialOrder get_comparator() const override {
 			switch (ideal->order) {
 				case cmp::Lexical:
 					return gmp_lex_less;

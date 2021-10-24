@@ -56,7 +56,7 @@ namespace algebra::poly {
 			bool simplified = true;
 			std::vector<PolyPtr> curr = polys;
 			int count = 0;
-			while (simplified && count++ < 4) {
+			while (simplified && count++ < 400) {
 				simplified = false;
 				for (int p = 0; p < (int) curr.size() && !simplified; p++) {
 					const auto& poly = curr[p];
@@ -67,7 +67,7 @@ namespace algebra::poly {
 						}
 
 						std::cout << "Can use " << poly << " to assign " << poly->index_impl->ideal->name(v) << std::endl;
-						std::cout << "Substituting " << v << " = " << *var << std::endl;
+						std::cout << "Substituting " << poly->index_impl->ideal->name(v) << " = " << *var << std::endl;
 
 						std::vector<PolyPtr> reduced_system;
 						for (int i = 0; (int) i < curr.size(); i++) {
