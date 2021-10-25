@@ -76,6 +76,18 @@ namespace algebra::poly {
 			terms.erase(index);
 		}
 
+        [[nodiscard]] inline
+        int degree(int var_num) const {
+            int deg = 0;
+            for (const auto& term : terms) {
+                int pow = term.first->get(var_num);
+                if (deg < pow) {
+                    deg = pow;
+                }
+            }
+            return deg;
+        }
+
 		[[nodiscard]] inline
 		std::shared_ptr<PolyDict> substitute(int index, const std::shared_ptr<PolyDict>& value) {
 			// Could reduce the dimension...
@@ -104,6 +116,15 @@ namespace algebra::poly {
 			}
 			return p;
 		}
+
+        [[nodiscard]] inline
+        IndexPtr gcd() {
+            auto ret = terms.begin()->first;
+            for (const auto term : terms) {
+                ret = ret->gcd(term.first);
+            }
+            return ret;
+        }
 
 		[[nodiscard]] inline
 		Monomial leading() const {
@@ -356,25 +377,89 @@ namespace algebra::poly {
 		}
 	};
 
-	typedef std::shared_ptr<PolyDict> PolyPtr;
+    typedef std::shared_ptr<PolyDict> PolyPtr;
+
+    namespace simplify {
+        [[nodiscard]] inline
+        PolyPtr constant(const std::shared_ptr<IndexImpl>& impl, double value) {
+            PolyPtr p = std::make_shared<PolyDict>(impl);
+            p->operator+=(Monomial(impl->create_empty(), value));
+            return p;
+        }
+
+        [[nodiscard]] inline
+        PolyPtr variable(const std::shared_ptr<IndexImpl>& impl, const std::string& name) {
+            auto var = impl->create_empty();
+            var->set(impl->ideal->get_var_index(name), 1);
+
+            PolyPtr p = std::make_shared<PolyDict>(impl);
+            p->operator+=(Monomial(var, 1.0));
+            return p;
+        }
+    }
+
+    [[nodiscard]] inline
+    PolyPtr operator*(const PolyPtr& p1, const PolyPtr& p2) {
+        return p1->operator*(p2);
+    }
+    [[nodiscard]] inline
+    PolyPtr operator*(const PolyPtr& p1, const Monomial& p2) {
+        return p1->operator*(p2);
+    }
+    [[nodiscard]] inline
+    PolyPtr operator*(const PolyPtr& p1, const double v) {
+        return p1->operator*(simplify::constant(p1->index_impl, v));
+    }
+    [[nodiscard]] inline
+    PolyPtr operator/(const PolyPtr& p1, const double v) {
+        if (std::abs(v) < POLY_TOL) {
+            throw std::runtime_error{"division by zero"};
+        }
+        return p1 * (1.0 / v);
+    }
+    [[nodiscard]] inline
+    PolyPtr operator-(const PolyPtr& p1, const PolyPtr& p2) {
+        return p1->operator-(p2);
+    }
+    [[nodiscard]] inline
+    PolyPtr operator+(const PolyPtr& p1, const PolyPtr& p2) {
+        return p1->operator+(p2);
+    }
+    [[nodiscard]] inline
+    PolyPtr operator-(const PolyPtr& p1) {
+        return p1->operator-();
+    }
+    [[nodiscard]] inline
+    PolyPtr operator-(const PolyPtr& p1, const double v) {
+        return p1 - simplify::constant(p1->index_impl, v);
+    }
+    inline
+    PolyPtr& operator+=(PolyPtr& p1, const PolyPtr& p2) {
+        p1->operator+=(p2);
+        return p1;
+    }
+    inline
+    PolyPtr& operator-=(PolyPtr& p1, const PolyPtr& p2) {
+        p1->operator-=(p2);
+        return p1;
+    }
+
+    inline
+    PolyPtr& operator+=(PolyPtr& p1, const Monomial& p2) {
+        p1->operator+=(p2);
+        return p1;
+    }
+
+    inline
+    std::ostream& operator<<(std::ostream& os, const PolyPtr& p2) {
+        return os << *p2;
+    }
+    inline
+    std::ostream& operator<<(std::ostream& os, const Monomial& monomial) {
+        return os << monomial.second << "*" << *monomial.first;
+    }
 
 	namespace simplify {
-		[[nodiscard]] inline
-		PolyPtr constant(const std::shared_ptr<IndexImpl>& impl, double value) {
-			PolyPtr p = std::make_shared<PolyDict>(impl);
-			p->operator+=(Monomial(impl->create_empty(), value));
-			return p;
-		}
-
-		[[nodiscard]] inline
-		PolyPtr variable(const std::shared_ptr<IndexImpl>& impl, const std::string& name) {
-			auto var = impl->create_empty();
-			var->set(impl->ideal->get_var_index(name), 1);
-
-			PolyPtr p = std::make_shared<PolyDict>(impl);
-			p->operator+=(Monomial(var, 1.0));
-			return p;
-		}
 
 		inline
 		void print_present_vars(std::ostream& os, const PolyPtr& poly, int index) {
@@ -422,7 +507,7 @@ namespace algebra::poly {
 		[[nodiscard]] inline
 		std::optional<PolyPtr> get_assignment_var(const PolyPtr& poly, int var_index) {
 			auto index_ptr = poly->index_impl->create_empty();
-			index_ptr->set(var_index, 1);
+            index_ptr->set(var_index, 1);
 			const auto& loc = poly->terms.find(index_ptr);
 			if (loc == poly->terms.end()) {
 				return {};
@@ -440,19 +525,50 @@ namespace algebra::poly {
 			bool success;
 			PolyPtr numerator;
 			PolyPtr denominator;
+            int var_num;
 
-			LinearSubstitution(const PolyPtr& orig)
-				: success{true},
+			LinearSubstitution(int var_num, const PolyPtr& orig)
+				: success{true}
 				, numerator{orig->empty()}
 				, denominator{orig->empty()}
+                , var_num{var_num}
 			{}
 
 			virtual ~LinearSubstitution() = default;
+
+            friend inline
+            std::ostream& operator<<(std::ostream& os, const LinearSubstitution& s) {
+                os << "{success=" << s.success << ", var=" << s.var_num << ", numerator=" << s.numerator << ", denominator=" << s.denominator << "}";
+                return os;
+            }
+
+            [[nodiscard]] inline
+            PolyPtr apply(const PolyPtr& poly) const {
+                auto ret = poly->empty();
+                auto max_deg = poly->degree(var_num);
+
+                for (const auto& term : poly->terms) {
+                    auto pow = term.first->get(var_num);
+                    if (pow == 0) {
+                        ret += term;
+                        continue;
+                    }
+
+                    const auto rem = term.first->copy();
+                    rem->set(var_num, 0);
+                    ret += numerator->pow(pow) * denominator->pow(max_deg - pow) * Monomial{rem, term.second};
+
+//                    std::cout << term << " goes to " << numerator->pow(pow) * denominator->pow(max_deg - pow) * Monomial{rem, term.second} << std::endl;
+//                    std::cout << ret << std::endl;
+                }
+
+                return ret->to_monic();
+            }
 		};
 
 		[[nodiscard]] inline
 		std::shared_ptr<LinearSubstitution> get_linear_assignment(const PolyPtr& poly, int var_index) {
-			auto ret = std::make_shared<LinearSubstitution>(poly);
+			auto ret = std::make_shared<LinearSubstitution>(var_index, poly);
 			for (const auto& term : poly->terms) {
 				int pow = term.first->get(var_index);
 
@@ -462,7 +578,7 @@ namespace algebra::poly {
 				if (pow == 0) {
 					ret->numerator->operator-=(rest);
 				} else if (pow == 1) {
-					ret->denominator->operator+=(rest);
+					ret->denominator += rest;
 				} else {
 					ret->success = false;
 				}
@@ -489,71 +605,6 @@ namespace algebra::poly {
 //		}
 	};
 
-	typedef std::shared_ptr<PolyDict> PolyPtr;
-
-
-
-
-	[[nodiscard]] inline
-	PolyPtr operator*(const PolyPtr& p1, const PolyPtr& p2) {
-		return p1->operator*(p2);
-	}
-	[[nodiscard]] inline
-	PolyPtr operator*(const PolyPtr& p1, const Monomial& p2) {
-		return p1->operator*(p2);
-	}
-	[[nodiscard]] inline
-	PolyPtr operator*(const PolyPtr& p1, const double v) {
-		return p1->operator*(simplify::constant(p1->index_impl, v));
-	}
-	[[nodiscard]] inline
-	PolyPtr operator/(const PolyPtr& p1, const double v) {
-		if (std::abs(v) < POLY_TOL) {
-			throw std::runtime_error{"division by zero"};
-		}
-		return p1 * (1.0 / v);
-	}
-	[[nodiscard]] inline
-	PolyPtr operator-(const PolyPtr& p1, const PolyPtr& p2) {
-		return p1->operator-(p2);
-	}
-	[[nodiscard]] inline
-	PolyPtr operator+(const PolyPtr& p1, const PolyPtr& p2) {
-		return p1->operator+(p2);
-	}
-	[[nodiscard]] inline
-	PolyPtr operator-(const PolyPtr& p1) {
-		return p1->operator-();
-	}
-	[[nodiscard]] inline
-	PolyPtr operator-(const PolyPtr& p1, const double v) {
-		return p1 - simplify::constant(p1->index_impl, v);
-	}
-	inline
-	PolyPtr& operator+=(PolyPtr& p1, const PolyPtr& p2) {
-		p1->operator+=(p2);
-		return p1;
-	}
-	inline
-	PolyPtr& operator-=(PolyPtr& p1, const PolyPtr& p2) {
-		p1->operator-=(p2);
-		return p1;
-	}
-
-	inline
-	PolyPtr& operator+=(PolyPtr& p1, const Monomial& p2) {
-		p1->operator+=(p2);
-		return p1;
-	}
-
-	inline
-	std::ostream& operator<<(std::ostream& os, const PolyPtr& p2) {
-		return os << *p2;
-	}
-	inline
-	std::ostream& operator<<(std::ostream& os, const Monomial& monomial) {
-		return os << monomial.second << "*" << *monomial.first;
-	}
 }
 
 #endif //IDEA_POLYDICT_H

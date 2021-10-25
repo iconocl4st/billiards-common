@@ -129,6 +129,18 @@ namespace algebra::poly {
 			return maxes;
 		}
 
+        [[nodiscard]] inline
+        std::shared_ptr<MultiIndex> gcd(const std::shared_ptr<MultiIndex>& other) const {
+            if (dim() != other->dim()) {
+                throw std::runtime_error{"Cannot compute gcd in a different dimension"};
+            }
+            auto mins = empty();
+            for (int i = 0; i < dim(); i++) {
+                mins->set(i, std::min(get(i), other->get(i)));
+            }
+            return mins;
+        }
+
 		[[nodiscard]] inline
 		int degree() const {
 			int sum = 0;
