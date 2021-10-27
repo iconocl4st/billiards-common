@@ -39,10 +39,9 @@ namespace billiards::config {
 		constexpr int LOWER_RIGHT_RAIL = 5;
 	}
 
+    // This should be renamed, it has more info than just the table: it has the ball colors...
 	class Table : public json::Serializable {
 	public:
-
-
 		std::array<BallInfo, 16> balls;
 		std::array<Pocket, 6> pockets;
 		geometry::Dimensions dims;
@@ -84,7 +83,7 @@ namespace billiards::config {
 			pockets[constants::LEFT_UPPER_POCKET].orientation = PocketOrientation{horz_loc::RIGHT, vert_loc::UPPER};
 		}
 
-		virtual ~Table() = default;
+		~Table() override = default;
 
 		[[nodiscard]] inline
 		Rail rail(const int p1, const int p2) const {

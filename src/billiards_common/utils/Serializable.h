@@ -12,13 +12,13 @@
 
 namespace billiards::json {
 
-	class ParseResult {
-	public:
-		bool success;
-		std::stringstream error_msg;
+    class ParseResult {
+    public:
+        bool success;
+        std::stringstream error_msg;
 
-		ParseResult(bool success) : success{success}, error_msg{} {}
-		ParseResult() : ParseResult(true) {}
+        ParseResult(bool success) : success{success}, error_msg{} {}
+        ParseResult() : ParseResult(true) {}
 //		ParseResult(const char *msg) : success{false}, error_msg{} {
 //			error_msg << msg;
 //		}
@@ -28,8 +28,8 @@ namespace billiards::json {
 //			error_msg << cause.error_msg.str();
 //		}
 
-		~ParseResult() = default;
-	};
+        ~ParseResult() = default;
+    };
 
 #define HAS_NUMBER(value, name) (value.contains(name) && value[name].is_number())
 #define HAS_BOOL(value, name) (value.contains(name) && value[name].is_boolean())
@@ -84,17 +84,17 @@ namespace billiards::json {
     PARSE_CHILD(result, value[key], member);					\
 } while (false)
 
-	class Serializable {
-	public:
-		Serializable() = default;
-		virtual ~Serializable() = default;
+    class Serializable {
+    public:
+        Serializable() = default;
+        virtual ~Serializable() = default;
 
-		virtual void to_json(json::SaxWriter& writer) const = 0;
+        virtual void to_json(json::SaxWriter& writer) const = 0;
 
-		virtual void parse(const nlohmann::json& value, ParseResult& result) = 0;
+        virtual void parse(const nlohmann::json& value, ParseResult& result) = 0;
 
-		// TODO: change this to a SaxReader instead of a nlohmann::json
-	};
+        // TODO: change this to a SaxReader instead of a nlohmann::json
+    };
 }
 
 
