@@ -5,6 +5,8 @@
 #ifndef GLVIEW_POCKET_H
 #define GLVIEW_POCKET_H
 
+#include <utility>
+
 #include "billiards_common/geometry/geometry.h"
 
 namespace billiards::config {
@@ -83,14 +85,15 @@ namespace billiards::config {
 		PocketOrientation orientation;
 
 		Pocket() = default;
+
 		Pocket(geometry::Point outer_segment_1, geometry::Point inner_segment_1, geometry::Point outer_segment_2)
-			: inner_segment_1{inner_segment_1}
-			, outer_segment_1{outer_segment_1}
-			, outer_segment_2{outer_segment_2}
+			: inner_segment_1{std::move(inner_segment_1)}
+			, outer_segment_1{std::move(outer_segment_1)}
+			, outer_segment_2{std::move(outer_segment_2)}
 			, hole_center{}
 			, orientation{}
 		{}
-		~Pocket() = default;
+		~Pocket() override = default;
 
 		[[nodiscard]] geometry::Point center() const {
 			// TODO: remove this method...
@@ -104,7 +107,7 @@ namespace billiards::config {
 			return geometry::reflect(inner_segment_1, normal);
 		}
 
-		void to_json(json::SaxWriter& writer) const {
+		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
 			writer.key("outer-segment-1");
 			outer_segment_1.to_json(writer);
@@ -115,10 +118,10 @@ namespace billiards::config {
 			writer.end_object();
 		};
 
-		void parse(const nlohmann::json& value, json::ParseResult& status) {
-			REQUIRE_CHILD(status, value, "inner-segment-1", inner_segment_1, "Missing an outer segment");
-			REQUIRE_CHILD(status, value, "outer-segment-1", outer_segment_1, "Missing an outer segment");
-			REQUIRE_CHILD(status, value, "outer-segment-2", outer_segment_2, "Missing an outer segment");
+		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			REQUIRE_CHILD(status, value, "inner-segment-1", inner_segment_1, "Missing a segment");
+			REQUIRE_CHILD(status, value, "outer-segment-1", outer_segment_1, "Missing a segment");
+			REQUIRE_CHILD(status, value, "outer-segment-2", outer_segment_2, "Missing a segment");
 		};
 	};
 }

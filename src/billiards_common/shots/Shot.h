@@ -16,7 +16,7 @@ namespace billiards::shots {
 		std::vector<std::shared_ptr<ShotStep>> steps;
 
 		Shot() = default;
-		virtual ~Shot() = default;
+		~Shot() override = default;
 
 		void operator=(const Shot& other) {
 			steps.clear();

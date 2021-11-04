@@ -23,6 +23,7 @@ namespace billiards::json {
             , path{path}
         {
             reload();
+            //save();
         }
 
         virtual ~SerializableCache() = default;

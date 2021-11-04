@@ -15,31 +15,33 @@ namespace billiards::shots {
 		Shot shot;
 		CueingInfo cueing;
 		std::vector<StepInfo> infos;
-		bool is_valid;
+		bool valid;
 
 		explicit ShotInformation(const Shot& shot)
 			: shot{shot}
 			, cueing{}
 			, infos{}
-			, is_valid{true}
+			, valid{true}
 		{}
 		ShotInformation()
 			: shot{}
 			, cueing{}
 			, infos{}
-			, is_valid{true}
+			, valid{true}
 		{}
 
 		~ShotInformation() override = default;
 
 		inline
 		void invalidate() {
-			is_valid = false;
+            valid = false;
 		}
 
 		inline
 		void update_validity(bool b) {
-			is_valid &= b;
+            if (!valid) {
+                invalidate();
+            }
 		}
 
 		[[nodiscard]] inline

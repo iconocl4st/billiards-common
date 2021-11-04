@@ -30,6 +30,7 @@ namespace billiards::graphics {
 			radius = value["r"].get<double>();
 			ShapeGraphics::parse(value, status);
 		}
+
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
 
