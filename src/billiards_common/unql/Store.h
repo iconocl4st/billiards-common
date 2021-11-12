@@ -76,7 +76,8 @@ namespace billiards::unql {
 			}
 		}
 
-		bool list(std::function<bool(const Record<C>&)>& receiver) const {
+		template <class T>
+		bool list(std::function<bool(const Record<T>&)>& receiver) const {
 			DbConnection con{db_file, UNQLITE_OPEN_CREATE};
 			if (con.has_error()) {
 				return false;
@@ -90,7 +91,7 @@ namespace billiards::unql {
 
 			Buffer buff;
 			for (unqlite_kv_cursor_first_entry(cursor.cursor); unqlite_kv_cursor_valid_entry(cursor.cursor); unqlite_kv_cursor_next_entry(cursor.cursor)) {
-				Record<C> record;
+				Record<T> record;
 				bool success = con.fetch(cursor.cursor, buff, record);
 				if (!success) {
 					return false;

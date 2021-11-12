@@ -75,12 +75,12 @@ namespace billiards::utils {
 }
 
 
-#define HANDLE_OPTIONS do {													\
-	crow::response resp;													\
-	resp.add_header("Access-Control-Allow-Origin", "*");					\
-	resp.add_header("Access-Control-Allow-Headers", "Content-Type");		\
-	resp.add_header("Access-Control-Allow-Methods", "PUT, GET, OPTIONS");	\
-	return resp;															\
+#define HANDLE_OPTIONS do {																\
+	crow::response resp;																\
+	resp.add_header("Access-Control-Allow-Origin", "*");								\
+	resp.add_header("Access-Control-Allow-Headers", "Content-Type");					\
+	resp.add_header("Access-Control-Allow-Methods", "PUT, POST, DELETE, GET, OPTIONS");	\
+	return resp;																		\
 } while (false)
 
 

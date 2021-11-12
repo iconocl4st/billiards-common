@@ -102,8 +102,21 @@ namespace billiards::unql {
 			if (has_error()) {
 				return false;
 			}
-			boost::uuids::string_generator gen;
-			boost::uuids::uuid uuid = gen(buff.buff);
+			buff.buff[key_size] = 0;
+
+			boost::uuids::uuid uuid{};
+
+			try {
+				boost::uuids::string_generator gen;
+				uuid = gen(buff.buff);
+			} catch (std::exception& ex) {
+				std::cerr << "Unable to parse uuid from cursor:" << std::endl;
+				std::cerr << ex.what() << std::endl;
+				return false;
+			} catch (...) {
+				std::cerr << "Unable to parse uuid from cursor, unknown cause." << std::endl;
+				return false;
+			}
 
 			unqlite_int64 data_size = 0;
 			rc = unqlite_kv_cursor_data(cursor, nullptr, &data_size);
