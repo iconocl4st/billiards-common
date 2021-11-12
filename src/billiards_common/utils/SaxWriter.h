@@ -6,15 +6,15 @@
 #define GLVIEW_SAXWRITER_H
 
 #include <string>
-#include <ctype.h>
+#include <cctype>
 
 namespace billiards::json {
 
 	class SaxWriter {
-
 	public:
+
 		SaxWriter() = default;
-		~SaxWriter() = default;
+		virtual ~SaxWriter() = default;
 
 		virtual void begin_object() = 0;
 		virtual void end_object() = 0;
@@ -30,9 +30,13 @@ namespace billiards::json {
 		virtual void value(uint64_t val) = 0;
 		virtual void value(uint8_t val) = 0;
 		virtual void value(bool val) = 0;
-		virtual void value(const std::string &val) = 0;
+		virtual void value(const std::string& val) = 0;
 		virtual void value(double val) = 0;
 		virtual void null() = 0;
+
+		virtual void string_value(const std::string& val) {
+			value(val);
+		}
 
 		virtual void field(const std::string &key, const std::string& val) = 0;
 		virtual void field(const std::string &key, int val) = 0;
@@ -43,11 +47,15 @@ namespace billiards::json {
 
 		virtual void null_field(const std::string &key) = 0;
 
+		virtual void string_field(const std::string& key, const std::string& val) {
+			field(key, val);
+		}
 
-		virtual void value(char *val) { value(std::string{val});}
-		virtual void field(const std::string& key, char *val) { field(key, std::string{val});}
-		virtual void value(const char *val) { value(std::string{val});}
-		virtual void field(const std::string& key, const char *val) { field(key, std::string{val});}
+		virtual void value(char *val) { string_value(val);}
+		virtual void field(const std::string& key, char *val) { string_field(key, val);}
+		virtual void value(const char *val) { string_value(val);}
+		virtual void field(const std::string& key, const char *val) { string_field(key, val);}
+
 	};
 
 }

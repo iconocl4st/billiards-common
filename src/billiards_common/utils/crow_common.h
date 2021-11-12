@@ -125,6 +125,19 @@ namespace billiards::utils {
 	return resp;			 								\
 } while (false)
 
+
+// resp.set_header("Content-Type", "application-json");
+// resp.set_header("Mime-type", "application-json");
+// resp.add_header("Access-Control-Allow-Origin", "*");
+
+#define RETURN_RESPONSE(def_resp) do { \
+	crow::response resp{billiards::json::dump(def_resp)};	\
+	resp.add_header("Access-Control-Allow-Origin", "*");	\
+	resp.set_header("Content-Type", "application/json");	\
+	resp.set_header("Mime-Type", "application/json");		\
+	return resp;											\
+} while (false)
+
 // TODO:
 // Shutdown stops the processes from returning...
 #define DO_STATUS_ENDPOINT() do {												\

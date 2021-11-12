@@ -9,6 +9,7 @@
 #include <iomanip>
 
 #include "billiards_common/utils/Serializable.h"
+#include "billiards_common/utils/NlohmannWriter.h"
 
 namespace billiards::json {
 
@@ -18,13 +19,10 @@ namespace billiards::json {
         S cached;
         std::string path;
 
-        explicit SerializableCache(const std::string& path)
+        explicit SerializableCache(std::string path)
             : cached{}
-            , path{path}
-        {
-            reload();
-            //save();
-        }
+            , path{std::move(path)}
+        {}
 
         virtual ~SerializableCache() = default;
 

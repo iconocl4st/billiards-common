@@ -23,6 +23,7 @@ namespace billiards::shots {
 			// masse, jump
 		};
 
+		[[nodiscard]] inline
 		std::string to_string(const ShotStepType type) {
 			switch (type) {
 				case CUE:
@@ -40,6 +41,7 @@ namespace billiards::shots {
 			}
 		}
 
+		[[nodiscard]] inline
 		ShotStepType from_string(const std::string& str) {
 			if (str == "cue") {
 				return CUE;
@@ -61,8 +63,8 @@ namespace billiards::shots {
 	public:
 		step_type::ShotStepType type;
 
-		ShotStep(step_type::ShotStepType type) : type{type} {}
-		virtual ~ShotStep() = default;
+		explicit ShotStep(step_type::ShotStepType type) : type{type} {}
+		~ShotStep() override = default;
 
 		virtual void write_details(json::SaxWriter& writer) const = 0;
 
@@ -79,12 +81,14 @@ namespace billiards::shots {
 		// size_t?
 		int pocket;
 
-		PocketStep(int pocket)
+		explicit PocketStep(int pocket)
 			: ShotStep{step_type::POCKET}
 			, pocket{pocket}
 			{}
 
 		PocketStep() : PocketStep{-1} {}
+
+		~PocketStep() override = default;
 
 		void write_details(json::SaxWriter& writer) const override {
 			writer.field("pocket", pocket);
@@ -142,6 +146,8 @@ namespace billiards::shots {
 
 		KissStep() : KissStep{-1, kt::ROLLING} {}
 
+		~KissStep() override = default;
+
 		void write_details(json::SaxWriter& writer) const override {
 			writer.field("kissed-ball", kissed_ball);
 			writer.field("kiss-type", kt::to_string(type));
@@ -161,12 +167,14 @@ namespace billiards::shots {
 	public:
 		int cue_ball;
 
-		CueStep(int cue_ball)
+		explicit CueStep(int cue_ball)
 			: ShotStep{step_type::CUE}
 			,  cue_ball{cue_ball}
 		{}
 
 		CueStep() : CueStep{-1} {}
+
+		~CueStep() override = default;
 
 		void write_details(json::SaxWriter& writer) const override {
 			writer.field("cue-ball", cue_ball);
@@ -183,12 +191,14 @@ namespace billiards::shots {
 	public:
 		int object_ball;
 
-		StrikeStep(int object_ball)
+		explicit StrikeStep(int object_ball)
 			: ShotStep{step_type::STRIKE}
 			, object_ball{object_ball}
 		{}
 
 		StrikeStep() : StrikeStep{-1} {}
+
+		~StrikeStep() override = default;
 
 		void write_details(json::SaxWriter& writer) const override {
 			writer.field("object-ball", object_ball);
@@ -205,12 +215,14 @@ namespace billiards::shots {
 	public:
 		int rail;
 
-		RailStep(int rail)
+		explicit RailStep(int rail)
 			: ShotStep{step_type::RAIL}
 			, rail{rail}
 		{}
 
 		RailStep() : RailStep{-1} {}
+
+		~RailStep() override = default;
 
 		void write_details(json::SaxWriter& writer) const override {
 			writer.field("rail", rail);

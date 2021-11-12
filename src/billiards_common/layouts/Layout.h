@@ -11,29 +11,29 @@
 #include "billiards_common/shots/Shot.h"
 #include "billiards_common/graphics/parse_graphics.h"
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
+namespace billiards::layout {
 
-
-namespace billiards::layout : public billiards::json::Serializable {
-
-    class Layout {
+    class Layout : public billiards::json::Serializable {
     public:
-        boost::uuids::uuid uuid;
-
+		std::string name;
         Locations locations;
         std::list<shots::Shot> shots;
         std::list<std::shared_ptr<graphics::GraphicsPrimitive>> graphics;
 
-        Layout() {}
+        Layout()
+            : name{"No name"}
+			, locations{}
+            , shots{}
+            , graphics{}
+        {}
+
         ~Layout() override = default;
 
         void parse(const nlohmann::json& value, json::ParseResult& status) override {
-            ENSURE_STRING(status, value, "uuid", "Must have a uuid");
-            uuid = boost::lexical_cast<uuid>(value["uuid"].get<std::string>());
+            REQUIRE_CHILD(status, value, "locations", locations, "Must have locations");
 
-            REQUIRE_CHILD(status, value, "locations", locations, "Must have a ball locations");
-
+			ENSURE_STRING(status, value, "name", "Must have a name");
+			name = value["name"].get<std::string>();
 
             ENSURE_ARRAY(status, value, "shots", "Must have a list of shots");
             shots.clear();
@@ -48,7 +48,7 @@ namespace billiards::layout : public billiards::json::Serializable {
             ENSURE_ARRAY(status, value, "graphics", "Must have a list of graphics");
             graphics.clear();
             for (const auto& graphic : value["graphics"]) {
-                auto g = parse_graphics(graphic, status);
+                auto g = graphics::parse_graphics(graphic, status);
                 graphics.push_back(g);
                 if (!status.success) {
                     return;
@@ -59,8 +59,7 @@ namespace billiards::layout : public billiards::json::Serializable {
         void to_json(json::SaxWriter& writer) const override {
             writer.begin_object();
 
-            writer.key("uuid");
-            writer.value(boost::lexical_cast<std::string>(uuid));
+			writer.field("name", name);
 
             writer.key("locations");
             locations.to_json(writer);
@@ -72,7 +71,6 @@ namespace billiards::layout : public billiards::json::Serializable {
             }
             writer.end_array();
 
-
             writer.key("graphics");
             writer.begin_array();
             for (const auto& g : graphics) {
@@ -83,6 +81,8 @@ namespace billiards::layout : public billiards::json::Serializable {
             writer.end_object();
         }
     };
+
+
 }
 
 #endif //IDEA_LAYOUT_H

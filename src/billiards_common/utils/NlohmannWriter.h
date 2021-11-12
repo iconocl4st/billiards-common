@@ -28,7 +28,7 @@ namespace billiards::json {
 
 	public:
 		NlohmannWriter() : stack{}, current_key{} {};
-		~NlohmannWriter() = default;
+		~NlohmannWriter() override = default;
 
 		void debug_stack() const {
 			for (const auto & it : stack) {
@@ -168,9 +168,6 @@ namespace billiards::json {
 		void null_field(const std::string &key) override {
 			stack.back().second[key] = nullptr;
 		}
-
-		void value(const char *val) override { value(std::string{val});}
-		void field(const std::string& key, const char *val) override { field(key, std::string{val});}
 
 		[[nodiscard]] inline
 		const nlohmann::json& get_root() const { return root; }

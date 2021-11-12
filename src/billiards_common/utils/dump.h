@@ -11,6 +11,7 @@
 
 namespace billiards::json {
 
+	[[nodiscard]] inline
 	std::string dump(const Serializable& obj) {
 		NlohmannWriter writer;
 		SaxWriter& w{writer};
@@ -18,6 +19,7 @@ namespace billiards::json {
 		return writer.get_root().dump();
 	}
 
+	[[nodiscard]] inline
 	std::string pretty_dump(const Serializable& obj) {
 		NlohmannWriter writer;
 		SaxWriter& w{writer};
