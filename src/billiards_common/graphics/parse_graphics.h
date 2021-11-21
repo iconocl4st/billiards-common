@@ -8,6 +8,8 @@
 #include "billiards_common/graphics/Circle.h"
 #include "billiards_common/graphics/Lines.h"
 #include "billiards_common/graphics/Polygon.h"
+#include "billiards_common/graphics/Text.h"
+#include "billiards_common/graphics/Image.h"
 
 namespace billiards::graphics {
 	inline
@@ -24,6 +26,8 @@ namespace billiards::graphics {
 			primitive = new Lines;
 		} else if (type == "polygon") {
 			primitive = new Polygon;
+		} else if (type == "text") {
+			primitive = new Text;
 		} else {
 			return std::shared_ptr<GraphicsPrimitive>{primitive};
 		}

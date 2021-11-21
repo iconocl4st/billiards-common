@@ -5,7 +5,7 @@
 #ifndef IDEA_LAYOUT_H
 #define IDEA_LAYOUT_H
 
-#include <list>
+#include <vector>
 
 #include "billiards_common/shots/Locations.h"
 #include "billiards_common/shots/Shot.h"
@@ -17,8 +17,9 @@ namespace billiards::layout {
     public:
 		std::string name;
         Locations locations;
-        std::list<shots::Shot> shots;
-        std::list<std::shared_ptr<graphics::GraphicsPrimitive>> graphics;
+        std::vector<shots::Shot> shots;
+        std::vector<std::shared_ptr<graphics::GraphicsPrimitive>> graphics;
+		// Could have some wild cards as well...
 
         Layout()
             : name{"No name"}

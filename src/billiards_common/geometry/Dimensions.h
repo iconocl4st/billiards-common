@@ -7,6 +7,8 @@
 
 #include "billiards_common/utils/Serializable.h"
 
+#include "billiards_common/geometry/Point.h"
+
 namespace billiards::geometry {
 
 	class Dimensions : public json::Serializable {
@@ -19,6 +21,11 @@ namespace billiards::geometry {
 //		Dimensions() : width{92}, height{46} {}
 
 		virtual ~Dimensions() = default;
+
+		[[nodiscard]] inline
+		geometry::Point scale_to_center(const geometry::Point& p, const double alpha) const {
+			return p * alpha + geometry::Point{width, height} * 0.5 * (1 - alpha);
+		}
 		
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
