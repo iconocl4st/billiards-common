@@ -6,7 +6,7 @@
 #define IDEA_HIGH_ORDER_POLYS_H
 
 #include <iostream>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <list>
 
 #include "billiards_common/geometry/tolerance.h"
