@@ -5,14 +5,14 @@
 #ifndef IDEA_SHOTHELPERS_H
 #define IDEA_SHOTHELPERS_H
 
-#include "billiards_common/config/Table.h"
+#include "billiards_common/config/PoolConfiguration.h"
 #include "billiards_common/shots/Locations.h"
 
 namespace billiards::shots {
 
 	[[nodiscard]] inline
 	int get_ball_type_index(
-		const config::Table& table,
+		const config::PoolConfiguration& table,
 		const layout::Locations& locations,
 		int index
 	) {
@@ -36,7 +36,7 @@ namespace billiards::shots {
 
 	[[nodiscard]] inline
 	const config::BallInfo *get_ball_type(
-		const config::Table& table,
+		const config::PoolConfiguration& table,
 		const layout::Locations& locations,
 		int index
 	) {

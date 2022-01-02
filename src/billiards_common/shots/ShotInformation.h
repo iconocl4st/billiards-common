@@ -10,6 +10,11 @@
 
 namespace billiards::shots {
 
+/*
+ * TODO: This should be combined with the shot.
+ *
+ * Each step should just have details or something.
+ */
 	class ShotInformation : public json::Serializable {
 	public:
 		Shot shot;

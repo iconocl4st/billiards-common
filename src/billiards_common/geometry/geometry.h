@@ -71,7 +71,12 @@ namespace billiards::geometry {
 		const MaybePoint& p
 	) {
 		const auto diff = l2 - l1;
-		const auto t1 = (p - l1).dot(diff) / diff.norm2();
+		// TODO: Check that this is really norm2 and not norm....
+		const auto dist = diff.norm2();
+		if (!dist.can_divide()) {
+			return MaybePoint{};
+		}
+		const auto t1 = (p - l1).dot(diff) / dist;
 		const auto t2 = t1.max(0).min(1);
 		return l1 + diff * t2;
 	}

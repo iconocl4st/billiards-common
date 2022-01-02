@@ -342,7 +342,7 @@ namespace billiards::geometry {
 			return os;
 		}
 
-		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+		void parse(const nlohmann::json& value, [[maybe_unused]] json::ParseResult& status) override {
 			if (HAS_NUMBER(value, "x")) {
 				x = value["x"].get<double>();
 			}

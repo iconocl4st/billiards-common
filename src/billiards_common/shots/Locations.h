@@ -8,17 +8,17 @@
 #include <vector>
 
 #include "billiards_common/shots/LocatedBall.h"
-#include "billiards_common/geometry/Dimensions.h"
+#include "billiards_common/config/TableDimensions.h"
 
 namespace billiards::layout {
 
 	class Locations : public json::Serializable {
 	public:
 		std::vector<LocatedBall> balls;
-		geometry::Dimensions table_dims;
+		config::TableDimensions table_dims;
 
 		Locations() = default;
-		virtual ~Locations() = default;
+		~Locations() override = default;
 
 		[[nodiscard]] int cue_ball_index() const {
 			int index = 0;

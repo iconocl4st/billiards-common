@@ -1,0 +1,9 @@
+Script started on 2021-12-23 00:31:39-07:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="145" LINES="35"]
+[?2004h┏ ]0;thallock@localhost:/work/pool/repos/billiards-common/src[01;32mthallock@localhost[01;34m /work/pool/repos/billiards-common/src $[00m 
+┗ $ aslk
+[?2004lbash: aslk: command not found
+[?2004h┏ ]0;thallock@localhost:/work/pool/repos/billiards-common/src[01;32mthallock@localhost[01;34m /work/pool/repos/billiards-common/src $[00m 
+┗ $ [?2004l
+exit
+
+Script done on 2021-12-23 00:31:45-07:00 [COMMAND_EXIT_CODE="127"]

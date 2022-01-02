@@ -5,8 +5,6 @@
 #ifndef GLVIEW_TABLEDIMENSIONS_H
 #define GLVIEW_TABLEDIMENSIONS_H
 
-#include "billiards_common/utils/Serializable.h"
-
 #include "billiards_common/geometry/Point.h"
 
 namespace billiards::geometry {
@@ -20,7 +18,7 @@ namespace billiards::geometry {
 		Dimensions() : width{-1}, height{-1} {}
 //		Dimensions() : width{92}, height{46} {}
 
-		virtual ~Dimensions() = default;
+		~Dimensions() override = default;
 
 		[[nodiscard]] inline
 		geometry::Point scale_to_center(const geometry::Point& p, const double alpha) const {
@@ -37,7 +35,7 @@ namespace billiards::geometry {
 		void parse(const nlohmann::json& value, json::ParseResult& status) override {
 			ENSURE_NUMBER(status, value, "width", "Dimensions must have a width");
 			width = value["width"].get<double>();
-			ENSURE_NUMBER(status, value, "width", "Dimensions must have a height");
+			ENSURE_NUMBER(status, value, "height", "Dimensions must have a height");
 			height = value["height"].get<double>();
 		}
 	};

@@ -6,7 +6,7 @@
 #define IDEA_SHOT_IS_POSSIBLE_H
 
 
-#include "billiards_common/config/Table.h"
+#include "billiards_common/config/PoolConfiguration.h"
 #include "billiards_common/shots/Locations.h"
 #include "billiards_common/shots/ShotInformation.h"
 
@@ -14,7 +14,7 @@ namespace billiards::shots {
 
 	[[nodiscard]] inline
 	bool shot_info_is_possible(
-		const config::Table& table,
+		const config::PoolConfiguration& table,
 		const layout::Locations& locations,
 		const ShotInformation& info
 	) {

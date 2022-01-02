@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "billiards_common/shots/Locations.h"
-#include "billiards_common/shots/Shot.h"
 #include "billiards_common/graphics/parse_graphics.h"
+#include "billiards_common/layouts/LayoutShot.h"
 
 namespace billiards::layout {
 
@@ -17,7 +17,7 @@ namespace billiards::layout {
     public:
 		std::string name;
         Locations locations;
-        std::vector<shots::Shot> shots;
+        std::vector<LayoutShot> shots;
         std::vector<std::shared_ptr<graphics::GraphicsPrimitive>> graphics;
 		// Could have some wild cards as well...
 

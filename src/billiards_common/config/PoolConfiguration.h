@@ -2,10 +2,11 @@
 // Created by thallock on 9/17/21.
 //
 
-#ifndef IDEA_TABLE_H
-#define IDEA_TABLE_H
+#ifndef IDEA_POOLCONFIGURATION_H
+#define IDEA_POOLCONFIGURATION_H
 
-#include "billiards_common/geometry/Dimensions.h"
+#include "billiards_common/config/TableDimensions.h"
+#include "billiards_common/config/TableGeometry.h"
 #include "billiards_common/geometry/geometry.h"
 
 #include "billiards_common/config/Ball.h"
@@ -16,6 +17,13 @@
 	geometry::Point{X + 3.0 * std::cos(THETA + M_PI / 4), Y + 3.0 * std::sin(THETA + M_PI / 4)},	\
 	geometry::Point{X + 0.5 * std::cos(THETA + M_PI / 4), Y + 0.5 * std::sin(THETA + M_PI / 4)},	\
 	geometry::Point{X + 3.0 * std::cos(THETA - M_PI / 4), Y + 3.0 * std::sin(THETA - M_PI / 4)}}
+
+
+
+/*
+ * There should be some sort of default, or ideal pool config determined only by a table dimensions.
+ * and a default ball radius?
+ */
 
 
 namespace billiards::config {
@@ -40,13 +48,18 @@ namespace billiards::config {
 	}
 
     // This should be renamed, it has more info than just the table: it has the ball colors...
-	class Table : public json::Serializable {
+	class PoolConfiguration : public json::Serializable {
 	public:
 		std::array<BallInfo, 16> balls;
+		// Should be generated from the geometry...
 		std::array<Pocket, 6> pockets;
-		geometry::Dimensions dims;
+		TableDimensions dims;
+		// TODO: Should be configurable...
+//		TableGeometry geometry;
 
-		Table()
+
+		// Should be able to create a default Config from a TableDimensions....
+		PoolConfiguration()
 			: balls{
 			BallInfo{   ball_type::CUE, 2.26 / 2, graphics::color::from_int(255, 255, 255),  0, "cue"},
 			BallInfo{ ball_type::SOLID, 2.26 / 2, graphics::color::from_int(255, 245,  64),  1, "one"},
@@ -73,7 +86,8 @@ namespace billiards::config {
 				POCKET_DEF(51, 48, -0.5 * M_PI),
 				POCKET_DEF(92, 46, -0.75 * M_PI)
 			}
-			, dims{92, 46}
+			, dims{}
+//			, geometry{dims}
 		{
 			pockets[constants::RIGHT_LOWER_POCKET].orientation = PocketOrientation{horz_loc::RIGHT, vert_loc::LOWER};
 			pockets[constants::MIDDLE_LOWER_POCKET].orientation = PocketOrientation{horz_loc::MIDDLE, vert_loc::LOWER};
@@ -83,7 +97,7 @@ namespace billiards::config {
 			pockets[constants::LEFT_UPPER_POCKET].orientation = PocketOrientation{horz_loc::RIGHT, vert_loc::UPPER};
 		}
 
-		~Table() override = default;
+		~PoolConfiguration() override = default;
 
 		[[nodiscard]] inline
 		Rail rail(const int p1, const int p2) const {
@@ -162,6 +176,7 @@ namespace billiards::config {
 		inline
 		void to_json(json::SaxWriter& writer) const override {
 			writer.begin_object();
+//			writer.field("ball-radius", 1.13);
 			writer.key("balls");
 			writer.begin_array();
 			for (const auto& ball : balls) {
@@ -174,13 +189,24 @@ namespace billiards::config {
 				pocket.to_json(writer);
 			}
 			writer.end_array();
+
 			writer.key("dimensions");
 			dims.to_json(writer);
+
+			writer.key("physical-geometry");
+			config::TableGeometry canonical{dims.width, dims.height, dims.pocket_width};
+			canonical.to_json(writer);
+
 			writer.end_object();
 		};
 
 		inline
 		void parse(const nlohmann::json& value, json::ParseResult& status) override {
+			// TODO: parse a default ball radius...
+
+			REQUIRE_CHILD(status, value, "dimensions", dims, "PoolConfiguration must have dimensions");
+//			REQUIRE_CHILD(status, value, "geometry", geometry, "Table must have the geometry");
+
 			ENSURE_ARRAY(status, value, "balls", "table must have balls");
 			// value["balls"].size() == balls.size()
 			auto num_balls = balls.size();
@@ -190,6 +216,7 @@ namespace billiards::config {
 					return;
 				}
 			}
+
 			ENSURE_ARRAY(status, value, "pockets", "table must have pockets");
 //			value["pockets"].size() == pockets.size()
 			auto num_pockets = pockets.size();
@@ -199,8 +226,6 @@ namespace billiards::config {
 					return;
 				}
 			}
-
-			REQUIRE_CHILD(status, value, "dimensions", dims, "Table must have dimensions");
 		};
 	};
 }
@@ -235,4 +260,4 @@ namespace billiards::config {
 					geometry::Point{91.76624319, 47.66666667},
 					geometry::Point{93.66969147, 43.33333333}
  */
-#endif //IDEA_TABLE_H
+#endif //IDEA_POOLCONFIGURATION_H
