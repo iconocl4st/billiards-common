@@ -5,7 +5,7 @@
 #ifndef IDEA_DENSE_JORDAN_H
 #define IDEA_DENSE_JORDAN_H
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 namespace algebra::poly {
 

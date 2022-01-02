@@ -5,9 +5,9 @@
 #ifndef IDEA_POLY_MAT_H
 #define IDEA_POLY_MAT_H
 
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
-#include <Eigen/SparseCore>
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/SparseCore>
 
 #include <ranges>
 #include <vector>

@@ -7,7 +7,7 @@
 
 #include "algebra/vec/PolyVec.h"
 #include "algebra/vec/Formatter.h"
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 namespace algebra::poly {
 

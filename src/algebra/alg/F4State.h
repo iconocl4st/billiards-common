@@ -9,7 +9,7 @@
 #include <map>
 #include <climits>
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 #include "algebra/PolyDict.h"
 #include "algebra/alg/Pair.h"
