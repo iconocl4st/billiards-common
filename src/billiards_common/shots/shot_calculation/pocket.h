@@ -8,6 +8,8 @@
 #include "AssignmentStatus.h"
 #include "math/orient_pocket.h"
 
+//#include "billiards_common/utils/dump.h"
+
 namespace billiards::shots {
 
 	inline
@@ -46,7 +48,12 @@ namespace billiards::shots {
 		}
 
 		const std::shared_ptr<PocketStep>& pocket_step = status.info.get_typed_step<PocketStep>(status.get_info());
-		const auto& pocket = status.params.config.get_pocket(pocket_step->pocket);
+
+		const auto pockets = status.params.config.pockets();
+		const auto& pocket = pockets[pocket_step->pocket];
+
+//		std::cout << "Targetting pocket: " << pocket_step->pocket << "\n" << json::pretty_dump(pocket) << "\n";
+
 		const auto& source = get_previous_status(status).exiting_location;
 		const auto& radius = get_previous_status(status).exiting_radius;
 

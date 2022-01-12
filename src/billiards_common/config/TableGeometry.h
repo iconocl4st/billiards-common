@@ -56,6 +56,11 @@ namespace billiards::config {
 		~TableGeometry() override = default;
 
 		[[nodiscard]] inline
+		geometry::Point point(int index) const {
+			return geometry::Point{points[index][0], points[index][1]};
+		}
+
+		[[nodiscard]] inline
 		geometry::Point lower_left() const {
 			return geometry::Point{points[6][0], points[8][1]};
 		}

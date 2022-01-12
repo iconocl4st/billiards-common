@@ -68,7 +68,9 @@ namespace billiards::shots {
 		}
 
 		const auto& pocket_step = status.info.get_typed_step<PocketStep>(next_status.get_info());
-		const auto& pocket = status.params.config.get_pocket(pocket_step->pocket);
+		const auto pockets = status.params.config.pockets();
+		const auto& pocket = pockets[pocket_step->pocket];
+//		const auto& pocket = status.params.config.get_pocket(pocket_step->pocket);
 
 		const auto next_target = std::make_shared<GoalPostTarget>();
 		auto target = std::make_shared<GoalPostTarget>();

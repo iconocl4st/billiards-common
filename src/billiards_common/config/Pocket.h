@@ -93,6 +93,18 @@ namespace billiards::config {
 			, hole_center{}
 			, orientation{}
 		{}
+
+		Pocket(
+			geometry::Point outer_segment_1, geometry::Point inner_segment_1, geometry::Point outer_segment_2,
+			PocketOrientation orientation
+		)
+			: inner_segment_1{std::move(inner_segment_1)}
+			, outer_segment_1{std::move(outer_segment_1)}
+			, outer_segment_2{std::move(outer_segment_2)}
+			, hole_center{}
+			, orientation{orientation}
+		{}
+
 		~Pocket() override = default;
 
 		[[nodiscard]] geometry::Point center() const {

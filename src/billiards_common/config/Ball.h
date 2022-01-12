@@ -6,6 +6,7 @@
 #define GLVIEW_BALLDIMENSIONS_H
 
 #include <array>
+#include <utility>
 
 #include "billiards_common/graphics/Color.h"
 
@@ -60,7 +61,7 @@ namespace billiards::config {
 		BallInfo(ball_type::BallType ball_type, double radius, graphics::Color color, int number, const char *name) :
 			ball_type{ball_type},
 			radius{radius},
-			color{color},
+			color{std::move(color)},
 			number{number},
 			name{name} {}
 

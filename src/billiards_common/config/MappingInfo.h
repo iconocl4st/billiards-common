@@ -10,16 +10,47 @@
 
 namespace billiards::project {
 
+	[[nodiscard]] inline
+	config::TableDimensions calculate_screen_dims(
+		const geometry::Dimensions& screen_size,
+		const config::TableDimensions& dims
+	) {
+		const double aspect = dims.height / dims.width;
+		if (screen_size.width * aspect < screen_size.height) {
+			return config::TableDimensions{
+					screen_size.width,
+					aspect * screen_size.width,
+					dims.pocket_width * screen_size.width / dims.width
+			};
+		} else {
+			return config::TableDimensions{
+					screen_size.height / aspect,
+					screen_size.height,
+					dims.pocket_width * screen_size.height / dims.height
+			};
+		}
+	}
+
+
 	class MappingInformation : public json::Serializable {
 	public:
 		geometry::Dimensions screen_size;
 		config::TableGeometry physical;
 		config::TableGeometry screen;
 
+		MappingInformation(
+			const geometry::Dimensions screen_size,
+			const config::TableDimensions& physical_dims
+		)
+				: screen_size{1920, 1080}
+				, physical{physical_dims}
+				, screen{calculate_screen_dims(screen_size, physical_dims)}
+		{}
+
 		MappingInformation()
-			: screen_size{1920, 1080}
-			, physical{config::TableDimensions{}}
-			, screen{config::TableDimensions{screen_size.width, screen_size.height, 100}}
+			: MappingInformation(
+				geometry::Dimensions{1920, 1080},
+				config::TableDimensions{})
 		{}
 
 		~MappingInformation() override = default;

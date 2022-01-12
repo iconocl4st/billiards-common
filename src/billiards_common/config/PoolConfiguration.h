@@ -13,12 +13,6 @@
 #include "billiards_common/config/Pocket.h"
 #include "billiards_common/config/Rail.h"
 
-#define POCKET_DEF(X, Y, THETA) Pocket{ \
-	geometry::Point{X + 3.0 * std::cos(THETA + M_PI / 4), Y + 3.0 * std::sin(THETA + M_PI / 4)},	\
-	geometry::Point{X + 0.5 * std::cos(THETA + M_PI / 4), Y + 0.5 * std::sin(THETA + M_PI / 4)},	\
-	geometry::Point{X + 3.0 * std::cos(THETA - M_PI / 4), Y + 3.0 * std::sin(THETA - M_PI / 4)}}
-
-
 
 /*
  * There should be some sort of default, or ideal pool config determined only by a table dimensions.
@@ -30,6 +24,7 @@ namespace billiards::config {
 
 	namespace constants {
 		constexpr int NUM_RAILS = 6;
+		constexpr int NUM_POCKETS = 6;
 
 		constexpr int RIGHT_LOWER_POCKET = 0;
 		constexpr int MIDDLE_LOWER_POCKET = 1;
@@ -52,7 +47,7 @@ namespace billiards::config {
 	public:
 		std::array<BallInfo, 16> balls;
 		// Should be generated from the geometry...
-		std::array<Pocket, 6> pockets;
+//		std::array<Pocket, 6> pockets;
 		TableDimensions dims;
 		// TODO: Should be configurable...
 //		TableGeometry geometry;
@@ -78,41 +73,29 @@ namespace billiards::config {
 			BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(  9, 148,  30), 14, "fourteen"},
 			BallInfo{ball_type::STRIPE, 2.26 / 2, graphics::color::from_int(255,  25,  98), 15, "fifteen"},
 			}
-			, pockets{
-				POCKET_DEF(92, 0, 0.75 * M_PI),
-				POCKET_DEF(51, -2, 0.5 * M_PI),
-				POCKET_DEF(0, 0, 0.25 * M_PI),
-				POCKET_DEF(0, 46, -0.25 * M_PI),
-				POCKET_DEF(51, 48, -0.5 * M_PI),
-				POCKET_DEF(92, 46, -0.75 * M_PI)
-			}
 			, dims{}
 //			, geometry{dims}
 		{
-			pockets[constants::RIGHT_LOWER_POCKET].orientation = PocketOrientation{horz_loc::RIGHT, vert_loc::LOWER};
-			pockets[constants::MIDDLE_LOWER_POCKET].orientation = PocketOrientation{horz_loc::MIDDLE, vert_loc::LOWER};
-			pockets[constants::LEFT_LOWER_POCKET].orientation = PocketOrientation{horz_loc::LEFT, vert_loc::LOWER};
-			pockets[constants::RIGHT_UPPER_POCKET].orientation = PocketOrientation{horz_loc::LEFT, vert_loc::UPPER};
-			pockets[constants::MIDDLE_UPPER_POCKET].orientation = PocketOrientation{horz_loc::MIDDLE, vert_loc::UPPER};
-			pockets[constants::LEFT_UPPER_POCKET].orientation = PocketOrientation{horz_loc::RIGHT, vert_loc::UPPER};
+
 		}
 
 		~PoolConfiguration() override = default;
 
 		[[nodiscard]] inline
 		Rail rail(const int p1, const int p2) const {
+			const auto pckts = pockets();
 			const int pocket1 = std::min(p1, p2);
 			const int pocket2 = std::max(p1, p2);
 			if (pocket1 == pocket2) {
 				throw std::runtime_error{"No rail between the same pocket..."};
 			}
-			const geometry::Point rail_center = (pockets[pocket1].outer_segment_1 + pockets[pocket2].outer_segment_2) / 2.0;
-			const double d11 = (pockets[pocket1].outer_segment_1 - rail_center).norm2();
-			const double d12 = (pockets[pocket1].outer_segment_2 - rail_center).norm2();
-			const double d21 = (pockets[pocket2].outer_segment_1 - rail_center).norm2();
-			const double d22 = (pockets[pocket2].outer_segment_2 - rail_center).norm2();
-			const geometry::Point inner1 = d11 <= d12 ? pockets[pocket1].outer_segment_1 : pockets[pocket1].outer_segment_2;
-			const geometry::Point inner2 = d21 <= d22 ? pockets[pocket2].outer_segment_1 : pockets[pocket2].outer_segment_2;
+			const geometry::Point rail_center = (pckts[pocket1].outer_segment_1 + pckts[pocket2].outer_segment_2) / 2.0;
+			const double d11 = (pckts[pocket1].outer_segment_1 - rail_center).norm2();
+			const double d12 = (pckts[pocket1].outer_segment_2 - rail_center).norm2();
+			const double d21 = (pckts[pocket2].outer_segment_1 - rail_center).norm2();
+			const double d22 = (pckts[pocket2].outer_segment_2 - rail_center).norm2();
+			const geometry::Point inner1 = d11 <= d12 ? pckts[pocket1].outer_segment_1 : pckts[pocket1].outer_segment_2;
+			const geometry::Point inner2 = d21 <= d22 ? pckts[pocket2].outer_segment_1 : pckts[pocket2].outer_segment_2;
 			const geometry::MaybeLine rail_line = geometry::through(inner1, inner2);
 			const geometry::MaybePoint table_center = geometry::MaybePoint{dims.width / 2, dims.height / 2};
 			const geometry::MaybeLine orthogonal = geometry::orthogonal_at(rail_line, table_center);
@@ -164,14 +147,35 @@ namespace billiards::config {
 					throw std::runtime_error{"Invalid pocket index"};
 			}
 		}
+		/*
+	 0		1	2		3
+ 4							5
 
-		[[nodiscard]] inline
-		const Pocket& get_pocket(int pocket_index) const {
-			if (pocket_index < 0 || pocket_index >= pockets.size()) {
-				throw std::runtime_error{"Invalid pocket"};
-			}
-			return pockets[pocket_index];
+ 6							7
+	 8		9	10		11
+ */
+
+		const std::array<Pocket, constants::NUM_POCKETS> pockets() const {
+			config::TableGeometry g{dims};
+			const geometry::Point center = geometry::Point{dims.width / 2.0, dims.height / 2.0};
+			return std::array<Pocket, constants::NUM_POCKETS> {
+				Pocket{g.point(11), g.point(11) * 1.1 - center * 0.1, g.point( 7), PocketOrientation{horz_loc::RIGHT, vert_loc::LOWER}},
+				Pocket{g.point( 9), g.point( 9) * 1.1 - center * 0.1, g.point(10), PocketOrientation{horz_loc::MIDDLE, vert_loc::LOWER}},
+				Pocket{g.point( 6), g.point( 6) * 1.1 - center * 0.1, g.point( 8), PocketOrientation{horz_loc::LEFT, vert_loc::LOWER}},
+				Pocket{g.point( 4), g.point( 4) * 1.1 - center * 0.1, g.point( 0), PocketOrientation{horz_loc::LEFT, vert_loc::UPPER}},
+				Pocket{g.point( 1), g.point( 1) * 1.1 - center * 0.1, g.point( 2), PocketOrientation{horz_loc::MIDDLE, vert_loc::UPPER}},
+				Pocket{g.point( 3), g.point( 3) * 1.1 - center * 0.1, g.point( 5), PocketOrientation{horz_loc::RIGHT, vert_loc::UPPER}},
+			};
 		}
+
+//		[[nodiscard]] inline
+//		const Pocket& get_pocket(int pocket_index) const {
+//			const auto pkts = pockets();
+//			if (pocket_index < 0 || pocket_index >= pkts.size()) {
+//				throw std::runtime_error{"Invalid pocket"};
+//			}
+//			return pkts[pocket_index];
+//		}
 
 		inline
 		void to_json(json::SaxWriter& writer) const override {
@@ -183,9 +187,13 @@ namespace billiards::config {
 				ball.to_json(writer);
 			}
 			writer.end_array();
+
+
+			// Maybe do away with this one?
 			writer.key("pockets");
 			writer.begin_array();
-			for (const auto& pocket : pockets) {
+			const auto pkts = pockets();
+			for (const auto& pocket : pkts) {
 				pocket.to_json(writer);
 			}
 			writer.end_array();
@@ -217,15 +225,14 @@ namespace billiards::config {
 				}
 			}
 
-			ENSURE_ARRAY(status, value, "pockets", "table must have pockets");
-//			value["pockets"].size() == pockets.size()
-			auto num_pockets = pockets.size();
-			for (int i = 0; i < num_pockets; i++) {
-				pockets[i].parse(value["pockets"][i], status);
-				if (!status.success) {
-					return;
-				}
-			}
+//			ENSURE_ARRAY(status, value, "pockets", "table must have pockets");
+////			value["pockets"].size() == pockets.size()
+//			for (int i = 0; i < constants::NUM_POCKETS; i++) {
+//				pockets[i].parse(value["pockets"][i], status);
+//				if (!status.success) {
+//					return;
+//				}
+//			}
 		};
 	};
 }
